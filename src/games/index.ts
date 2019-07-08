@@ -1,3 +1,4 @@
+import { Findfour } from './findfour/game';
 import { IGameModeInfo } from '../App/Game/GameModePicker';
 import { chessGameDef } from './chess';
 import { seabattleGameDef } from './seabattle';
@@ -6,6 +7,7 @@ import { takesixGameDef } from './takesix';
 import { ninemensmorrisGameDef } from './ninemensmorris';
 import { reversiGameDef } from './reversi';
 import { cornerusGameDef } from './cornerus';
+import { findfourGameDef } from './findfour';
 
 // Add new games here
 export const GAMES_MAP: IGameDefMap = {
@@ -16,6 +18,7 @@ export const GAMES_MAP: IGameDefMap = {
   cornerus: cornerusGameDef,
   ninemensmorris: ninemensmorrisGameDef,
   reversi: reversiGameDef,
+  findfour: findfourGameDef,
 };
 
 export const GAMES_LIST: IGameDef[] = [
@@ -26,6 +29,7 @@ export const GAMES_LIST: IGameDef[] = [
   GAMES_MAP.cornerus,
   GAMES_MAP.seabattle,
   GAMES_MAP.tictactoe,
+  GAMES_MAP.findfour,
 ];
 
 // No need to edit below
