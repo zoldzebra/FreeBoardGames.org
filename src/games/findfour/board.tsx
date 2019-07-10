@@ -10,7 +10,7 @@ import * as React from 'react';
 import { IGameArgs } from '../../App/Game/GameBoardWrapper';
 import { GameLayout } from '../../App/Game/GameLayout';
 import { GameMode } from '../../App/Game/GameModePicker';
-import { Circle, Cross, Lines } from './Shapes';
+import { Circle } from './Shapes';
 import { emptyCell, numOfColumns, numOfRows, p1disc, p2disc, playerDiscLookup } from './constants';
 
 interface IBoardProps {
@@ -24,11 +24,11 @@ interface IBoardProps {
 }
 
 export class Board extends React.Component<IBoardProps, {}> {
-  onClick = (columnIdx: number) => () => {
+    onClick(columnIdx: number) {
     if (this.isActive(columnIdx)) {
       this.props.moves.selectColumn(columnIdx);
     }
-  };
+  }
 
   isActive(columnIdx: number) {
     if (this.props.ctx.winner !== null) return false;
@@ -37,126 +37,79 @@ export class Board extends React.Component<IBoardProps, {}> {
     return true;
   }
 
-  isOnlineGame() {
-    return this.props.gameArgs && this.props.gameArgs.mode === GameMode.OnlineFriend;
-  }
-
-  isAIGame() {
-    return this.props.gameArgs && this.props.gameArgs.mode === GameMode.AI;
-  }
-
-  _getStatus() {
-    if (this.isOnlineGame()) {
-      if (this.props.ctx.currentPlayer === this.props.playerID) {
-        return 'YOUR TURN';
-      } else {
-        return 'Waiting for opponent...';
-      }
-    } else {
-      // Local or AI game
-      switch (this.props.ctx.currentPlayer) {
-        case '0':
-          return "Red's turn";
-        case '1':
-          return "Green's turn";
-      }
-    }
-  }
-
-  _getGameOver() {
-    if (this.isOnlineGame()) {
-      // Online game
-      if (this.props.ctx.gameover.winner !== undefined) {
-        if (this.props.ctx.gameover.winner === this.props.playerID) {
-          return 'you won';
-        } else {
-          return 'you lost';
-        }
-      } else {
-        return 'draw';
-      }
-    } else if (this.isAIGame()) {
-      switch (this.props.ctx.gameover.winner) {
-        case '0':
-          return 'you won';
-        case '1':
-          return 'you lost';
-        case undefined:
-          return 'draw';
-      }
-    } else {
-      // Local game
-      switch (this.props.ctx.gameover.winner) {
-        case '0':
-          return 'red won';
-        case '1':
-          return 'green won';
-        case undefined:
-          return 'draw';
-      }
-    }
-  }
-
   render() {
-    if (this.props.ctx.gameover) {
-      return (
-        <GameLayout
-          gameOver={this._getGameOver()}
-          extraCardContent={this._getGameOverBoard()}
-          gameArgs={this.props.gameArgs}
-        />
-      );
+    let message: JSX.Element;
+    if (this.props.ctx.winner !== null) {
+      message = <span>Winner: Player {playerDiscLookup[this.props.ctx.currentPlayer]}</span>;
+    } else {
+      message = <span>Current Player: Player {playerDiscLookup[this.props.ctx.currentPlayer]}</span>;
     }
-    return <GameLayout>{this._getBoard()}</GameLayout>;
-  }
-
-  _getCells() {
-    const cells = [];
-    for (let i = 0; i < 3; i++) {
-      for (let j = 0; j < 3; j++) {
-        const id = 3 * i + j;
-        cells.push(<rect key={`${id}`} x={i} y={j} width="1" height="1" fill="black" onClick={this.onClick(id)} />);
-        let overlay;
-        if (this.props.G.cells[id] === '0') {
-          overlay = <Cross x={i} y={j} key={`cross${id}`} />;
-        } else if (this.props.G.cells[id] === '1') {
-          overlay = <Circle x={i} y={j} key={`circle${id}`} />;
-        }
-        if (overlay) {
-          cells.push(overlay);
-        }
-      }
-    }
-    return cells;
-  }
-  _getBoard() {
-    const selectors = Array(numOfColumns)
-      .fill(null)
-      .map((_, i) => i)
-      .map(idx => <ColumnSelector active={this.isActive(idx)} handleClick={() => this.onClick(idx)} key={idx} />);
-    return selectors;
-  }
-
-  _getGameOverBoard() {
-    return (
-      <div style={{ textAlign: 'center' }}>
-        <svg width="50%" height="50%" viewBox="0 0 3 3">
-          {this._getCells()}
-          {Lines}
-        </svg>
-      </div>
+    const selectors = Array(numOfColumns).fill(numOfColumns).map((_, i) => i).map(idx =>
+      <ColumnSelector
+        active={this.isActive(idx)}
+        handleClick={() => this.onClick(idx)}
+        key={idx}
+      />
     );
+    return (
+      <div>
+        <h1>Four In A Row</h1>
+        <div>
+          {message}
+        </div>
+        {selectors}
+        <Grid grid={this.props.G.grid} />
+      </div>
+    )
   }
 }
 
 const ColumnSelector = ({ active, handleClick }: any) => {
   return (
     <div className="columnSelectorContainer">
-      <button disabled={!active} onClick={handleClick} className="columnSelector">
-        Select
-      </button>
+      <button disabled={!active} onClick={handleClick} className="columnSelector">Select</button>
     </div>
   );
-};
+}
 
+const Grid = ({ grid }: any) => {
+  let rows: JSX.Element[] = [];
+  for (var rowIdx = 0; rowIdx < numOfRows; rowIdx++) {
+    rows = rows.concat(
+      <div key={rowIdx}>
+        <Row row={grid[rowIdx]} />
+      </div>
+    );
+  }
+  return <React.Fragment>{rows}</React.Fragment>;
+}
+
+const Row = ({ row } : any) => {
+  const cells = row.map((c: any, idx: number) => <svg><Cell cell={c} idx={idx} /></svg>);
+  return cells;
+}
+
+const Cell = (props: any) => {
+  let cellColor;
+  switch (props.cell) {
+    case p1disc:
+      cellColor = 'red';
+      break;
+    case p2disc:
+      cellColor = 'blue';
+      break;
+    default:
+      cellColor = 'white';
+      break;
+  }
+  return (
+    <circle
+      key={`cir-${props.idx}`}
+      r=".25"
+      fill={cellColor}
+      stroke="lime"
+      style={{strokeWidth: 0.1}}
+    />
+  );
+}
 export default Board;
