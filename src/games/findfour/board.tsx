@@ -39,7 +39,7 @@ export class Board extends React.Component<IBoardProps, {}> {
 
   render() {
     let message: JSX.Element;
-    if (this.props.ctx.winner !== null) {
+    if (this.props.ctx.winner) {
       message = <span>Winner: Player {playerDiscLookup[this.props.ctx.currentPlayer]}</span>;
     } else {
       message = <span>Current Player: Player {playerDiscLookup[this.props.ctx.currentPlayer]}</span>;
