@@ -19,6 +19,7 @@ export class GameCard extends React.Component<IGameCardProps, {}> {
       width: '100%',
       backgroundPosition: 'left center',
       backgroundImage: `url(${this.props.game.imageURL})`,
+      backgroundSize: 'cover',
     };
     const baseBadgeStyle: React.CSSProperties = {
       position: 'absolute',
