@@ -24,7 +24,7 @@ export class GamesList extends React.Component<{}, {}> {
               max-width: 1200px;
               margin: 0 auto;
               display: grid;
-              grid-gap: 1rem;
+              grid-gap: 1.25rem;
             }
             @media (min-width: 600px) {
               .cards {
