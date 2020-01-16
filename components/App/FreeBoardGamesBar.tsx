@@ -34,7 +34,7 @@ class App extends React.Component<{}, {}> {
               <Toolbar>
                 <img style={{ marginRight: '8px', height: '48px' }} src={FbgLogo} alt="FbG" />
                 <Typography variant="h6" style={{ color: 'white' }}>
-                  FreeBoardGames.org
+                  testing
                 </Typography>
                 {versionInfo}
               </Toolbar>

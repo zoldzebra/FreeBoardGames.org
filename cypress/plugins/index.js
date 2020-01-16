@@ -1,5 +1,5 @@
 const wp = require('@cypress/webpack-preprocessor');
-const { addMatchImageSnapshotPlugin } = require('cypress-image-snapshot/plugin');
+const { addMatchImageSnapshotPlugin } = require('@duplotech/cypress-image-snapshot/plugin');
 
 const rmdir = require('rimraf');
 const dirToRemove = `${process.cwd()}/.nyc_output`;

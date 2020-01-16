@@ -20,7 +20,9 @@ install:
   - yarn install
 
 script:
-  - yarn run pre
+  # - yarn run ci
+  - ./.ci/cypress.sh
+  # - yarn run report:combined
 
-after_success:
-  - yarn run test:coveralls
+# after_success:
+#   - yarn run test:coveralls
