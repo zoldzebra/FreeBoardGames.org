@@ -26,7 +26,7 @@ class About extends React.Component<{}, {}> {
       <Card style={{ marginTop: '16px' }}>
         <CardContent>
           <Typography variant="h5" component="h2" style={{ marginBottom: '17px' }}>
-            About FreeBoardGames.org
+            About the site
           </Typography>
           <Typography component="p">
             FreeBoardGames.org is a free (as in freedom), mobile-first, board game platform. Its goal is to popularize
