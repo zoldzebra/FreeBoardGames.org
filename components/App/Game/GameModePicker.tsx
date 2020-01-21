@@ -144,7 +144,7 @@ export class GameModePicker extends React.Component<IGameModePickerProps, IGameM
       );
     }
     return (
-      <Card key={title} style={{ marginBottom: '16px' }}>
+      <Card key={title} style={{ maxWidth: '500px', marginBottom: '16px' }}>
         <CardHeader avatar={<Avatar aria-label={title}>{icon}</Avatar>} title={title} />
         <CardContent>
           <Typography component="p">{description}</Typography>

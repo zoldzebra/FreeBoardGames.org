@@ -16,7 +16,7 @@ class GameInfo extends React.Component<gameInfoProps, {}> {
   render() {
     const gameDef = this.props.gameDef;
     return (
-      <FreeBoardGamesBar>
+      <FreeBoardGamesBar FEATURE_FLAG_readyForDesktopView>
         <SEO title={`Play ${gameDef.name}, ${gameDef.description}`} description={gameDef.descriptionTag} />
         <GameCard game={gameDef} />
         <GameModePicker gameDef={gameDef} />

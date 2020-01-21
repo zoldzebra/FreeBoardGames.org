@@ -15,6 +15,7 @@ export class GameCard extends React.Component<IGameCardProps, {}> {
     const mainDivStyle: React.CSSProperties = {
       position: 'relative',
       height: '250px',
+      maxWidth: '500px',
       width: '100%',
       backgroundPosition: 'left center',
       backgroundImage: `url(${this.props.game.imageURL})`,
@@ -63,6 +64,7 @@ export class GameCard extends React.Component<IGameCardProps, {}> {
             top: '12px',
             left: '8px',
             paddingTop: '4px',
+            maxWidth: '500px'
           }}
         >
           {gameNameHeading}
