@@ -70,14 +70,48 @@ export class GameModePicker extends React.Component<IGameModePickerProps, IGameM
     for (const mode of this.props.gameDef.modes) {
       modes.push(this._getCard(mode));
     }
+    const mediaRules = this._getMediaRules();
     return (
       <div>
         <Typography variant="subtitle1" style={{ marginBottom: '16px' }}>
           Choose game mode
         </Typography>
-        {modes}
+        <style jsx>{`
+          .modes {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: grid;
+            grid-gap: 1.25rem;
+            align-self: center;
+            justify-self: center;
+          }
+        `}</style>
+        {mediaRules}
+        <div className="modes">{modes}</div>
       </div>
     );
+  }
+
+  _getMediaRules() {
+    let mediaRules = '';
+    const numberOfGameModes = this.props.gameDef.modes.length;
+    if (numberOfGameModes >= 3) {
+      mediaRules += `
+          @media (min-width: 900px) {
+            .modes {
+              grid-template-columns: repeat(3, 1fr);
+            }
+          }`;
+    }
+    if (numberOfGameModes >= 2) {
+      mediaRules += `
+          @media (min-width: 600px) {
+            .modes {
+              grid-template-columns: repeat(2, 1fr);
+            }
+          }`;
+    }
+    return <style jsx>{mediaRules}</style>;
   }
 
   _getCard(info: IGameModeInfo) {
@@ -284,6 +318,11 @@ export class GameModePicker extends React.Component<IGameModePickerProps, IGameM
         </MenuList>
       </div>
     );
+  }
+
+  _getNumOfCardsToDisplay(cardsToDisplay) {
+    const numberOfGameModes = this.props.gameDef.modes.length;
+    return Math.max(cardsToDisplay, numberOfGameModes);
   }
 
   _handleClickSelection = (mode: GameMode, value: any) => () => {
