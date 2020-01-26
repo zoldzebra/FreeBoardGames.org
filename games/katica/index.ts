@@ -6,7 +6,7 @@ import instructions from './instructions.md';
 
 export const katicaGameDef: IGameDef = {
   code: 'katica',
-  name: 'Katica Tülekedés',
+  name: 'Katicatülekedés',
   minPlayers: 2,
   maxPlayers: 2,
   imageURL: KaticaThumbnail,
@@ -17,7 +17,7 @@ export const katicaGameDef: IGameDef = {
   description: 'Katicatulekedes',
   descriptionTag: `A jatek rovid leirasa kerul ide...`,
   instructions: {
-    videoId: 'l4dfHBK9GRgTvcc',
+    videoId: 'RndlscTKsQI',
     text: instructions,
   },
   config: () => import('./config'),

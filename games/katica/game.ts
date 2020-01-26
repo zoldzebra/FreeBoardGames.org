@@ -37,7 +37,7 @@ export function isVictory(cells: number[]) {
   return false;
 }
 
-export const TictactoeGame = Game({
+export const KaticaGame = Game({
   name: 'katica',
 
   setup: () => ({
