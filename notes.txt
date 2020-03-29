@@ -1,0 +1,23 @@
+- use yarn
+- sync w original repo is risky
+
+- boardgame.io docs: https://boardgame.io/documentation
+
+
+TURNS
+	- switch players
+
+PHASES
+	- setup game pieces
+	- move pieces
+
+STAGES
+	- if actions needed from different in a turn of one player
+	- not needed for now
+
+EVENTS
+	- while a move changes G, an event changes ctx
+	- like endStage, endTurn, endPhase, endGame...
+	- trigger an event from game logic
+	- can have params
+

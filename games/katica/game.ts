@@ -41,7 +41,7 @@ export const KaticaGame = Game({
   name: 'katica',
 
   setup: () => ({
-    cells: Array(9).fill(null),
+    cells: Array(64).fill(null),
   }),
 
   moves: {

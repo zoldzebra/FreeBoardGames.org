@@ -52,10 +52,31 @@ export const Circle = (props: IShapeProps) => {
   );
 };
 
-export const Lines = [
-  <line key="line1" x1="1" y1="0" x2="1" y2="3" style={lineStyle} />,
-  <line key="line2" x1="2" y1="0" x2="2" y2="3" style={lineStyle} />,
-  <line key="line3" x1="0" y1="1" x2="3" y2="1" style={lineStyle} />,
-  <line key="line4" x1="0" y1="2" x2="3" y2="2" style={lineStyle} />,
-  <line key="line5" x1="0" y1="1" x2="3" y2="1" style={lineStyle} />,
-];
+const createLines = () => {
+  const Lines = [];
+  for (let i = 0; i <= 8; i++) {
+    const keyX = `lineX${i + 1}`;
+    const keyY = `lineY${i + 1}`;
+    Lines.push(
+      <line
+        key={keyX}
+        x1={i}
+        y1={0}
+        x2={i}
+        y2={8}
+        style={lineStyle}
+      />,
+      <line
+        key={keyY}
+        x1={0}
+        y1={i}
+        x2={8}
+        y2={i}
+        style={lineStyle}
+      />
+    );
+  };
+  return Lines;
+};
+
+export const Lines = createLines();
