@@ -5,6 +5,14 @@ interface IShapeProps {
   y: number;
 }
 
+interface FieldProps {
+  id: number;
+  x: number;
+  y: number;
+  onClick?: (id: number) => void;
+  isSelected: boolean;
+}
+
 const boldLineStyle = {
   strokeWidth: 0.1,
 };
@@ -48,6 +56,35 @@ export const Circle = (props: IShapeProps) => {
       fill="none"
       stroke="lime"
       style={boldLineStyle}
+    />
+  );
+};
+
+export const Field = (props: FieldProps) => {
+  if (props.isSelected) {
+    return (
+      <rect
+        x={props.x}
+        y={props.y}
+        width="1"
+        height="1"
+        fill="gray"
+        onClick={() => {
+          return props.onClick(props.id);
+        }}
+      />
+    );
+  }
+  return (
+    <rect
+      x={props.x}
+      y={props.y}
+      width="1"
+      height="1"
+      fill="green"
+      onClick={() => {
+        return props.onClick(props.id);
+      }}
     />
   );
 };

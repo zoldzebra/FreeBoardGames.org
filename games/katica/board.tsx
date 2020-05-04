@@ -9,7 +9,7 @@
 import * as React from 'react';
 import { IGameArgs } from 'components/App/Game/GameBoardWrapper';
 import { GameLayout } from 'components/App/Game/GameLayout';
-import { Circle, Cross, Lines } from './Shapes';
+import { Circle, Cross, Field, Lines } from './Shapes';
 import Typography from '@material-ui/core/Typography';
 import { isOnlineGame, isAIGame } from '../common/gameMode';
 import { IG } from './game';
@@ -19,24 +19,48 @@ interface IBoardProps {
   ctx: any;
   moves: any;
   playerID: string;
-  isActive: boolean;
   gameArgs?: IGameArgs;
   step?: any;
 }
 
+interface IBoardState {
+  selectedCellId: number | null;
+}
+
 export class Board extends React.Component<IBoardProps, {}> {
-  onClick = (id: number) => () => {
-    if (this.isActive(id)) {
-      this.props.moves.placePiece(id);
-      if (isAIGame(this.props.gameArgs)) {
-        setTimeout(this.props.step, 250);
-      }
-    }
+  state: IBoardState = {
+    selectedCellId: null
   };
 
-  isActive(id: number) {
-    return this.props.isActive && this.props.G.cells[id] === null;
-  }
+  onClickField = (id: number) => () => {
+    console.log('onClickField');
+    if (this.props.ctx.phase === 'Place') {
+      this.props.moves.placePiece(id);
+    }
+    if (this.props.ctx.phase === 'Move') {
+      console.log('Move phase id, selectedCellId', this.props.G.cells[id], this.state.selectedCellId);
+      if (!this.state.selectedCellId
+        && this.props.G.cells[id] !== null) {
+        console.log('select cell');
+        this.setState({
+          selectedCellId: id
+        });
+      }
+      if (this.state.selectedCellId
+        && this.props.G.cells[id] !== this.state.selectedCellId.toString()) {
+        console.log('move');
+        const moveTo = id;
+        const moveFrom = this.state.selectedCellId;
+        this.props.moves.dummyMovePiece(moveFrom, moveTo);
+        this.setState({
+          selectedCellId: null,
+        });
+      }
+    }
+    if (isAIGame(this.props.gameArgs)) {
+      setTimeout(this.props.step, 250);
+    }
+  };
 
   _getStatus() {
     if (isOnlineGame(this.props.gameArgs)) {
@@ -92,7 +116,7 @@ export class Board extends React.Component<IBoardProps, {}> {
 
 
   render() {
-    console.log('props', this.props);
+    console.log('state', this.state);
     if (this.props.ctx.gameover) {
       return (
         <GameLayout
@@ -110,7 +134,17 @@ export class Board extends React.Component<IBoardProps, {}> {
     for (let i = 0; i < 6; i++) {
       for (let j = 0; j < 7; j++) {
         const id = 7 * i + j;
-        cells.push(<rect key={`${id}`} x={i} y={j} width="1" height="1" fill="black" onClick={this.onClick(id)} />);
+        cells.push(
+          <Field
+            x={i}
+            y={j}
+            key={`${id}`}
+            id={id}
+            onClick={this.onClickField(id)}
+            isSelected={id === this.state.selectedCellId}
+          />
+        );
+
         let overlay;
         if (this.props.G.cells[id] === 'player0-1pointsPiece') {
           overlay = <Cross x={i} y={j} key={`cross${id}`} />;

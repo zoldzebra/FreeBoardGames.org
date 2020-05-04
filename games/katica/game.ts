@@ -63,8 +63,21 @@ export function placePiece(G: IG, ctx: any, id: number) {
   }
 }
 
-export function dummyMovePiece(G: IG, ctx: any, id: number) {
-  console.log('move piece on cell id', id);
+export function dummyMovePiece(G: IG, ctx: any, moveFrom: number, moveTo: number) {
+  console.log('move fn: moveFrom, moveTo', moveFrom, moveTo);
+  const cells = [...G.cells];
+  console.log('cells moveTo content', cells[moveTo]);
+  if (cells[moveTo] === null) {
+    console.log('move piece on cell id', moveTo);
+    cells[moveTo] = cells[moveFrom]
+    cells[moveFrom] = null;
+    const newG = {
+      ...G,
+      cells,
+    }
+    console.log('newG', newG);
+    return { ...newG };
+  }
 }
 
 export const KaticaGame = Game({
@@ -82,7 +95,6 @@ export const KaticaGame = Game({
 
   flow: {
     movesPerTurn: 1,
-
     startingPhase: Phase.Place,
     phases: {
       Place: {
