@@ -12,9 +12,10 @@ import { GameLayout } from 'components/App/Game/GameLayout';
 import { Circle, Cross, Lines } from './Shapes';
 import Typography from '@material-ui/core/Typography';
 import { isOnlineGame, isAIGame } from '../common/gameMode';
+import { IG } from './game';
 
 interface IBoardProps {
-  G: any;
+  G: IG;
   ctx: any;
   moves: any;
   playerID: string;

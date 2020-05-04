@@ -8,6 +8,16 @@
 
 import { Game } from '@freeboardgame.org/boardgame.io/core';
 
+export enum Phase {
+  Place = 'Place',
+  Move = 'Move',
+}
+
+export interface IG {
+  cells: string[]
+  piecesPlaced: number;
+}
+
 export function isVictory(cells: number[]) {
   const positions = [
     // [0, 1, 2],
@@ -37,14 +47,24 @@ export function isVictory(cells: number[]) {
   return false;
 }
 
-export function placePiece(G: any, ctx: any, id: number) {
+export function placePiece(G: IG, ctx: any, id: number) {
   console.log('placePiece cell id', id);
+
   const cells = [...G.cells];
 
   if (cells[id] === null) {
     cells[id] = `player${ctx.currentPlayer}-1pointsPiece`;
-    return { ...G, cells };
+    const newG: IG = {
+      ...G,
+      cells,
+      piecesPlaced: G.piecesPlaced + 1,
+    }
+    return { ...newG };
   }
+}
+
+export function dummyMovePiece(G: IG, ctx: any, id: number) {
+  console.log('move piece on cell id', id);
 }
 
 export const KaticaGame = Game({
@@ -52,14 +72,28 @@ export const KaticaGame = Game({
 
   setup: () => ({
     cells: Array(6 * 7).fill(null),
+    piecesPlaced: 0,
   }),
 
   moves: {
-    placePiece
+    placePiece,
+    dummyMovePiece,
   },
 
   flow: {
     movesPerTurn: 1,
+
+    startingPhase: Phase.Place,
+    phases: {
+      Place: {
+        allowedMoves: ['placePiece'],
+        next: Phase.Move,
+        endPhaseIf: (G: IG) => G.piecesPlaced === 4,
+      },
+      Move: {
+        allowedMoves: ['dummyMovePiece'],
+      },
+    },
 
     endGameIf: (G, ctx) => {
       if (isVictory(G.cells)) {
