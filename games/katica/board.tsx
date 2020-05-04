@@ -104,9 +104,9 @@ export class Board extends React.Component<IBoardProps, {}> {
 
   _getCells() {
     const cells = [];
-    for (let i = 0; i < 8; i++) {
-      for (let j = 0; j < 8; j++) {
-        const id = 8 * i + j;
+    for (let i = 0; i < 6; i++) {
+      for (let j = 0; j < 7; j++) {
+        const id = 7 * i + j;
         cells.push(<rect key={`${id}`} x={i} y={j} width="1" height="1" fill="black" onClick={this.onClick(id)} />);
         let overlay;
         if (this.props.G.cells[id] === '0') {
@@ -127,7 +127,7 @@ export class Board extends React.Component<IBoardProps, {}> {
         <Typography variant="h5" style={{ textAlign: 'center', color: 'white', marginBottom: '16px' }}>
           {this._getStatus()}
         </Typography>
-        <svg width="100%" height="100%" viewBox="0 0 8 8">
+        <svg width="100%" height="100%" viewBox="0 0 6 7">
           {this._getCells()}
           {Lines}
         </svg>
@@ -138,7 +138,7 @@ export class Board extends React.Component<IBoardProps, {}> {
   _getGameOverBoard() {
     return (
       <div style={{ textAlign: 'center' }}>
-        <svg width="50%" height="50%" viewBox="0 0 8 8">
+        <svg width="50%" height="50%" viewBox="0 0 6 7">
           {this._getCells()}
           {Lines}
         </svg>

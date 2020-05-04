@@ -10,14 +10,14 @@ import { Game } from '@freeboardgame.org/boardgame.io/core';
 
 export function isVictory(cells: number[]) {
   const positions = [
-    [0, 1, 2],
-    [3, 4, 5],
-    [6, 7, 8],
-    [0, 3, 6],
-    [1, 4, 7],
-    [2, 5, 8],
-    [0, 4, 8],
-    [2, 4, 6],
+    // [0, 1, 2],
+    // [3, 4, 5],
+    // [6, 7, 8],
+    // [0, 3, 6],
+    // [1, 4, 7],
+    // [2, 5, 8],
+    // [0, 4, 8],
+    // [2, 4, 6],
   ];
 
   for (const pos of positions) {
@@ -41,11 +41,12 @@ export const KaticaGame = Game({
   name: 'katica',
 
   setup: () => ({
-    cells: Array(64).fill(null),
+    cells: Array(6 * 7).fill(null),
   }),
 
   moves: {
     clickCell(G: any, ctx: any, id: number) {
+      console.log('clickCell cell id', id);
       const cells = [...G.cells];
 
       if (cells[id] === null) {
