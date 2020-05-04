@@ -37,6 +37,16 @@ export function isVictory(cells: number[]) {
   return false;
 }
 
+export function placePiece(G: any, ctx: any, id: number) {
+  console.log('placePiece cell id', id);
+  const cells = [...G.cells];
+
+  if (cells[id] === null) {
+    cells[id] = `player${ctx.currentPlayer}-1pointsPiece`;
+    return { ...G, cells };
+  }
+}
+
 export const KaticaGame = Game({
   name: 'katica',
 
@@ -45,15 +55,7 @@ export const KaticaGame = Game({
   }),
 
   moves: {
-    clickCell(G: any, ctx: any, id: number) {
-      console.log('clickCell cell id', id);
-      const cells = [...G.cells];
-
-      if (cells[id] === null) {
-        cells[id] = ctx.currentPlayer;
-        return { ...G, cells };
-      }
-    },
+    placePiece
   },
 
   flow: {

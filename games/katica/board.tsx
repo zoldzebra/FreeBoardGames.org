@@ -26,7 +26,7 @@ interface IBoardProps {
 export class Board extends React.Component<IBoardProps, {}> {
   onClick = (id: number) => () => {
     if (this.isActive(id)) {
-      this.props.moves.clickCell(id);
+      this.props.moves.placePiece(id);
       if (isAIGame(this.props.gameArgs)) {
         setTimeout(this.props.step, 250);
       }
@@ -89,7 +89,9 @@ export class Board extends React.Component<IBoardProps, {}> {
     }
   }
 
+
   render() {
+    console.log('props', this.props);
     if (this.props.ctx.gameover) {
       return (
         <GameLayout
@@ -109,9 +111,9 @@ export class Board extends React.Component<IBoardProps, {}> {
         const id = 7 * i + j;
         cells.push(<rect key={`${id}`} x={i} y={j} width="1" height="1" fill="black" onClick={this.onClick(id)} />);
         let overlay;
-        if (this.props.G.cells[id] === '0') {
+        if (this.props.G.cells[id] === 'player0-1pointsPiece') {
           overlay = <Cross x={i} y={j} key={`cross${id}`} />;
-        } else if (this.props.G.cells[id] === '1') {
+        } else if (this.props.G.cells[id] === 'player1-1pointsPiece') {
           overlay = <Circle x={i} y={j} key={`circle${id}`} />;
         }
         if (overlay) {
