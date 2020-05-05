@@ -8,17 +8,30 @@
 
 import { Game } from '@freeboardgame.org/boardgame.io/core';
 
+import * as R from 'ramda';
+
 export enum Phase {
   Place = 'Place',
   Move = 'Move',
 }
 
+export interface Piece {
+  player: number | null,
+  piece: number | null,
+}
+
 export interface IG {
-  cells: string[]
+  cells: Piece[];
   piecesPlaced: number;
 }
 
+export const EMPTY_FIELD = {
+  player: null,
+  piece: null,
+};
+
 export function isVictory(cells: number[]) {
+
   const positions = [
     // [0, 1, 2],
     // [3, 4, 5],
@@ -48,12 +61,16 @@ export function isVictory(cells: number[]) {
 }
 
 export function placePiece(G: IG, ctx: any, id: number) {
-  console.log('placePiece cell id', id);
 
   const cells = [...G.cells];
+  console.log('cells', cells);
 
-  if (cells[id] === null) {
-    cells[id] = `player${ctx.currentPlayer}-1pointsPiece`;
+  if (R.equals(cells[id], EMPTY_FIELD)) {
+    console.log('place to cell', cells[id]);
+    cells[id] = {
+      player: Number(ctx.currentPlayer),
+      piece: 1,
+    };
     const newG: IG = {
       ...G,
       cells,
@@ -67,10 +84,10 @@ export function dummyMovePiece(G: IG, ctx: any, moveFrom: number, moveTo: number
   console.log('move fn: moveFrom, moveTo', moveFrom, moveTo);
   const cells = [...G.cells];
   console.log('cells moveTo content', cells[moveTo]);
-  if (cells[moveTo] === null) {
+  if (R.equals(cells[moveTo], EMPTY_FIELD)) {
     console.log('move piece on cell id', moveTo);
     cells[moveTo] = cells[moveFrom]
-    cells[moveFrom] = null;
+    cells[moveFrom] = EMPTY_FIELD;
     const newG = {
       ...G,
       cells,
@@ -84,7 +101,7 @@ export const KaticaGame = Game({
   name: 'katica',
 
   setup: () => ({
-    cells: Array(6 * 7).fill(null),
+    cells: Array(6 * 7).fill(EMPTY_FIELD),
     piecesPlaced: 0,
   }),
 
@@ -111,9 +128,9 @@ export const KaticaGame = Game({
       if (isVictory(G.cells)) {
         return { winner: ctx.currentPlayer };
       }
-      if (G.cells.filter((c: any) => c === null).length === 0) {
-        return { draw: true };
-      }
+      // if (G.cells.filter((c: any) => c === null).length === 0) {
+      //   return { draw: true };
+      // }
     },
   },
 });

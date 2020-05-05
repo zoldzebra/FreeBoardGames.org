@@ -7,12 +7,14 @@
  */
 
 import * as React from 'react';
+import * as R from 'ramda';
+
 import { IGameArgs } from 'components/App/Game/GameBoardWrapper';
 import { GameLayout } from 'components/App/Game/GameLayout';
 import { Circle, Cross, Field, Lines } from './Shapes';
 import Typography from '@material-ui/core/Typography';
 import { isOnlineGame, isAIGame } from '../common/gameMode';
-import { IG } from './game';
+import { IG, Piece, EMPTY_FIELD } from './game';
 
 interface IBoardProps {
   G: IG;
@@ -40,14 +42,14 @@ export class Board extends React.Component<IBoardProps, {}> {
     if (this.props.ctx.phase === 'Move') {
       console.log('Move phase id, selectedCellId', this.props.G.cells[id], this.state.selectedCellId);
       if (!this.state.selectedCellId
-        && this.props.G.cells[id] !== null) {
+        && !R.equals(this.props.G.cells[id], EMPTY_FIELD)) {
         console.log('select cell');
         this.setState({
           selectedCellId: id
         });
       }
       if (this.state.selectedCellId
-        && this.props.G.cells[id] !== this.state.selectedCellId.toString()) {
+        && id !== this.state.selectedCellId) {
         console.log('move');
         const moveTo = id;
         const moveFrom = this.state.selectedCellId;
@@ -146,9 +148,9 @@ export class Board extends React.Component<IBoardProps, {}> {
         );
 
         let overlay;
-        if (this.props.G.cells[id] === 'player0-1pointsPiece') {
+        if (this.props.G.cells[id].player === 0) {
           overlay = <Cross x={i} y={j} key={`cross${id}`} />;
-        } else if (this.props.G.cells[id] === 'player1-1pointsPiece') {
+        } else if (this.props.G.cells[id].player === 1) {
           overlay = <Circle x={i} y={j} key={`circle${id}`} />;
         }
         if (overlay) {
