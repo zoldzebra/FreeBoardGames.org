@@ -89,15 +89,9 @@ export class Board extends React.Component<IBoardProps, {}> {
 
   _onClick = (coords: IAlgebraicCoords) => {
     const position = algebraicToCartesian(coords.square);
-    console.log('onClick');
-    // if (this.state.selected === null && this._isSelectable(position)) {
-    //   this.setState({
-    //     ...this.state,
-    //     selected: position,
-    //   });
-    // } else {
-    //   this._move(position);
-    // }
+    if (this.props.ctx.phase === 'Place') {
+      this.props.moves.placePiece(position);
+    }
   };
 
   _getStatus() {
@@ -200,7 +194,7 @@ export class Board extends React.Component<IBoardProps, {}> {
   getPieces = () => {
     return this.props.G.board
       .map((piece, index) => ({ data: piece, index }))
-      .filter(piece => piece.data !== null)
+      .filter(piece => piece.data.id !== null)
       .map(piece => {
         const { x, y } = toCoord(piece.index);
         return (
@@ -215,7 +209,7 @@ export class Board extends React.Component<IBoardProps, {}> {
             key={piece.data.id}
           >
             <g>
-              <circle r="0.4" fill={piece.data.player === 0 ? grey[50] : grey[900]} cx="0.5" cy="0.5" />
+              <circle r="0.4" fill={piece.data.player === 0 ? grey[500] : grey[50]} cx="0.5" cy="0.5" />
               {/* {piece.data.isKing ? (
                 <circle r="0.2" cx="0.5" cy="0.5" fill={piece.data.playerID === '1' ? grey[800] : grey[400]} />
               ) : null} */}

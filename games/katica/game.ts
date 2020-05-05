@@ -75,9 +75,14 @@ export function isVictory(cells: number[]) {
   return false;
 }
 
+export function toIndex(coord: ICoord) {
+  return coord.x + coord.y * 6;
+}
+
 export function toCoord(position: number): ICoord {
-  const x = position % 8;
-  const y = Math.floor(position / 8);
+  const x = position % 6;
+  const y = Math.floor(position / 6);
+  console.log('toCoord position, x, y', position, x, y);
   return { x, y };
 }
 
@@ -85,12 +90,13 @@ export function areCoordsEqual(a: ICoord, b: ICoord) {
   return a.x === b.x && a.y === b.y;
 }
 
-export function placePiece(G: IG, ctx: any, id: number) {
+export function placePiece(G: IG, ctx: any, coords: ICoord) {
   const board = [...G.board];
+  const boardIndex = toIndex(coords);
 
-  if (R.equals(board[id], EMPTY_FIELD)) {
-    console.log('place to cell id', ctx.turn);
-    board[id] = {
+  console.log('place to cell id', ctx.turn);
+  if (R.equals(board[boardIndex], EMPTY_FIELD)) {
+    board[toIndex(coords)] = {
       id: ctx.turn,
       player: Number(ctx.currentPlayer),
       piece: 1,
