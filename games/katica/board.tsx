@@ -9,14 +9,14 @@
 import * as React from 'react';
 import * as R from 'ramda';
 import Typography from '@material-ui/core/Typography';
-import grey from '@material-ui/core/colors/grey';
-import blue from '@material-ui/core/colors/blue';
+import red from '@material-ui/core/colors/red';
+import green from '@material-ui/core/colors/green';
 
 import { IGameArgs } from 'components/App/Game/GameBoardWrapper';
 import { GameLayout } from 'components/App/Game/GameLayout';
 import { Circle, Cross, Field, Lines } from './Shapes';
 import { isOnlineGame, isAIGame } from '../common/gameMode';
-import { IG, Piece, EMPTY_FIELD, toCoord, IMove, areCoordsEqual } from './game';
+import { IG, Piece, EMPTY_FIELD, toCoord, toIndex, IMove, areCoordsEqual } from './game';
 import { Token } from '@freeboardgame.org/boardgame.io/ui';
 import {
   Checkerboard,
@@ -43,11 +43,20 @@ interface IBoardState {
   selected: ICartesianCoords;
 }
 
+function roundCoords(coords: ICartesianCoords) {
+  return { x: Math.round(coords.x), y: Math.round(coords.y) };
+}
+
 export class Board extends React.Component<IBoardProps, {}> {
   state: IBoardState = {
     selectedCellId: null,
     selected: null,
   };
+
+  isInverted() {
+    // return isOnlineGame(this.props.gameArgs) && this.props.playerID === '1';
+    return true;
+  }
 
   onClickField = (id: number) => () => {
     console.log('onClickField');
@@ -86,12 +95,68 @@ export class Board extends React.Component<IBoardProps, {}> {
     }
   };
 
+  shouldPlace = (coords: ICartesianCoords) => {
+    return R.equals(this.props.G.board[toIndex(coords)], EMPTY_FIELD);
+  }
+
+  _shouldDrag = (coords: ICartesianCoords) => {
+    if (this.props.ctx.phase === 'Move') {
+      const invertedCoords = applyInvertion(coords, this.isInverted());
+      console.log('coords inverted', applyInvertion(coords, this.isInverted()))
+      return this.props.G.board[toIndex(invertedCoords)].player === Number(this.props.ctx.currentPlayer);
+    }
+  };
 
   _onClick = (coords: IAlgebraicCoords) => {
     const position = algebraicToCartesian(coords.square);
     if (this.props.ctx.phase === 'Place') {
-      this.props.moves.placePiece(position);
+      const boardIndex = toIndex(position);
+      if (this.shouldPlace(position)) {
+        this.props.moves.placePiece(boardIndex);
+      }
     }
+  };
+
+  _onDrag = (coords: IOnDragData) => {
+    console.log('onDrag coords', coords);
+    const x = coords.x;
+    const y = coords.y;
+    const originalX = coords.originalX;
+    const originalY = coords.originalY;
+    if (Math.sqrt((x - originalX) ** 2 + (y - originalY) ** 2) > 0.2) {
+      console.log('onDrag calculation true');
+      this.setState({
+        ...this.state,
+        selected: applyInvertion({ x: originalX, y: originalY }, this.isInverted()),
+      });
+    } else {
+      this.setState({
+        ...this.state,
+        selected: null,
+      });
+    }
+  };
+
+  _onDrop = async (coords: ICartesianCoords) => {
+    if (this.state.selected) {
+      console.log('onDrop');
+      this._move(applyInvertion(roundCoords(coords), this.isInverted()));
+    }
+  };
+
+  _move = async (coords: ICartesianCoords) => {
+    if (this.state.selected === null || coords === null) {
+      return;
+    }
+
+    await this.props.moves.movePiece(this.state.selected, coords);
+    this.setState({
+      ...this.state,
+      selected: null,
+    });
+    // if (isAIGame(this.props.gameArgs) && this.props.ctx.currentPlayer === '1') {
+    //   this.stepAI();
+    // }
   };
 
   _getStatus() {
@@ -148,7 +213,6 @@ export class Board extends React.Component<IBoardProps, {}> {
 
 
   render() {
-    console.log('state', this.state);
     if (this.props.ctx.gameover) {
       return (
         <GameLayout
@@ -202,14 +266,14 @@ export class Board extends React.Component<IBoardProps, {}> {
             x={x}
             y={y}
             draggable={true}
-            // shouldDrag={this._shouldDrag}
-            // onDrop={this._onDrop}
-            // onDrag={this._onDrag}
+            shouldDrag={this._shouldDrag}
+            onDrop={this._onDrop}
+            onDrag={this._onDrag}
             animate={true}
             key={piece.data.id}
           >
             <g>
-              <circle r="0.4" fill={piece.data.player === 0 ? grey[500] : grey[50]} cx="0.5" cy="0.5" />
+              <circle r="0.4" fill={piece.data.player === 0 ? red[500] : green[500]} cx="0.5" cy="0.5" />
               {/* {piece.data.isKing ? (
                 <circle r="0.2" cx="0.5" cy="0.5" fill={piece.data.playerID === '1' ? grey[800] : grey[400]} />
               ) : null} */}

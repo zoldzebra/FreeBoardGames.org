@@ -82,7 +82,6 @@ export function toIndex(coord: ICoord) {
 export function toCoord(position: number): ICoord {
   const x = position % 6;
   const y = Math.floor(position / 6);
-  console.log('toCoord position, x, y', position, x, y);
   return { x, y };
 }
 
@@ -90,31 +89,26 @@ export function areCoordsEqual(a: ICoord, b: ICoord) {
   return a.x === b.x && a.y === b.y;
 }
 
-export function placePiece(G: IG, ctx: any, coords: ICoord) {
+export function placePiece(G: IG, ctx: any, boardIndex: number) {
   const board = [...G.board];
-  const boardIndex = toIndex(coords);
-
-  console.log('place to cell id', ctx.turn);
-  if (R.equals(board[boardIndex], EMPTY_FIELD)) {
-    board[toIndex(coords)] = {
-      id: ctx.turn,
-      player: Number(ctx.currentPlayer),
-      piece: 1,
-    };
-    const newG: IG = {
-      ...G,
-      board,
-      piecesPlaced: G.piecesPlaced + 1,
-    }
-    return { ...newG };
+  board[boardIndex] = {
+    id: ctx.turn,
+    player: Number(ctx.currentPlayer),
+    piece: 1,
+  };
+  const newG: IG = {
+    ...G,
+    board,
+    piecesPlaced: G.piecesPlaced + 1,
   }
+  return { ...newG };
 }
 
-export function movePiece(G: IG, ctx: any, moveFrom: number, moveTo: number) {
+export function movePiece(G: IG, ctx: any, moveFrom: ICoord, moveTo: ICoord) {
   console.log('movePiece: moveFrom, moveTo', moveFrom, moveTo);
   const board = [...G.board];
-  board[moveTo] = board[moveFrom]
-  board[moveFrom] = EMPTY_FIELD;
+  board[toIndex(moveTo)] = board[toIndex(moveFrom)];
+  board[toIndex(moveFrom)] = EMPTY_FIELD;
   const newG = {
     ...G,
     board,
@@ -134,6 +128,7 @@ export const KaticaGame = Game({
     placePiece,
     movePiece,
   },
+
 
   flow: {
     movesPerTurn: 1,
