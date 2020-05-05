@@ -16,19 +16,34 @@ export enum Phase {
 }
 
 export interface Piece {
+  id: number | null,
   player: number | null,
   piece: number | null,
 }
 
 export interface IG {
-  cells: Piece[];
+  board: Piece[];
   piecesPlaced: number;
 }
 
+interface ICoord {
+  x: number;
+  y: number;
+}
+
+export interface IMove {
+  from: ICoord;
+  to: ICoord;
+  jumped: ICoord;
+}
+
 export const EMPTY_FIELD = {
+  id: null,
   player: null,
   piece: null,
 };
+
+const initialBoard = Array(6 * 7).fill(EMPTY_FIELD);
 
 export function isVictory(cells: number[]) {
 
@@ -60,18 +75,29 @@ export function isVictory(cells: number[]) {
   return false;
 }
 
-export function placePiece(G: IG, ctx: any, id: number) {
-  const cells = [...G.cells];
+export function toCoord(position: number): ICoord {
+  const x = position % 8;
+  const y = Math.floor(position / 8);
+  return { x, y };
+}
 
-  if (R.equals(cells[id], EMPTY_FIELD)) {
-    console.log('place to cell', cells[id]);
-    cells[id] = {
+export function areCoordsEqual(a: ICoord, b: ICoord) {
+  return a.x === b.x && a.y === b.y;
+}
+
+export function placePiece(G: IG, ctx: any, id: number) {
+  const board = [...G.board];
+
+  if (R.equals(board[id], EMPTY_FIELD)) {
+    console.log('place to cell id', ctx.turn);
+    board[id] = {
+      id: ctx.turn,
       player: Number(ctx.currentPlayer),
       piece: 1,
     };
     const newG: IG = {
       ...G,
-      cells,
+      board,
       piecesPlaced: G.piecesPlaced + 1,
     }
     return { ...newG };
@@ -80,12 +106,12 @@ export function placePiece(G: IG, ctx: any, id: number) {
 
 export function movePiece(G: IG, ctx: any, moveFrom: number, moveTo: number) {
   console.log('movePiece: moveFrom, moveTo', moveFrom, moveTo);
-  const cells = [...G.cells];
-  cells[moveTo] = cells[moveFrom]
-  cells[moveFrom] = EMPTY_FIELD;
+  const board = [...G.board];
+  board[moveTo] = board[moveFrom]
+  board[moveFrom] = EMPTY_FIELD;
   const newG = {
     ...G,
-    cells,
+    board,
   }
   return { ...newG };
 }
@@ -93,8 +119,8 @@ export function movePiece(G: IG, ctx: any, moveFrom: number, moveTo: number) {
 export const KaticaGame = Game({
   name: 'katica',
 
-  setup: () => ({
-    cells: Array(6 * 7).fill(EMPTY_FIELD),
+  setup: (): IG => ({
+    board: initialBoard,
     piecesPlaced: 0,
   }),
 

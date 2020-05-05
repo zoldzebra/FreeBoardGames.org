@@ -8,13 +8,26 @@
 
 import * as React from 'react';
 import * as R from 'ramda';
+import Typography from '@material-ui/core/Typography';
+import grey from '@material-ui/core/colors/grey';
+import blue from '@material-ui/core/colors/blue';
 
 import { IGameArgs } from 'components/App/Game/GameBoardWrapper';
 import { GameLayout } from 'components/App/Game/GameLayout';
 import { Circle, Cross, Field, Lines } from './Shapes';
-import Typography from '@material-ui/core/Typography';
 import { isOnlineGame, isAIGame } from '../common/gameMode';
-import { IG, Piece, EMPTY_FIELD } from './game';
+import { IG, Piece, EMPTY_FIELD, toCoord, IMove, areCoordsEqual } from './game';
+import { Token } from '@freeboardgame.org/boardgame.io/ui';
+import {
+  Checkerboard,
+  IAlgebraicCoords,
+  ICartesianCoords,
+  IOnDragData,
+  applyInvertion,
+  algebraicToCartesian,
+  IColorMap,
+  cartesianToAlgebraic,
+} from './CheckerboardCustom';
 
 interface IBoardProps {
   G: IG;
@@ -27,11 +40,13 @@ interface IBoardProps {
 
 interface IBoardState {
   selectedCellId: number | null;
+  selected: ICartesianCoords;
 }
 
 export class Board extends React.Component<IBoardProps, {}> {
   state: IBoardState = {
-    selectedCellId: null
+    selectedCellId: null,
+    selected: null,
   };
 
   onClickField = (id: number) => () => {
@@ -42,8 +57,8 @@ export class Board extends React.Component<IBoardProps, {}> {
     if (this.props.ctx.phase === 'Move') {
       console.log('Move phase');
       if (!this.state.selectedCellId
-        && !R.equals(this.props.G.cells[id], EMPTY_FIELD)
-        && Number(this.props.ctx.currentPlayer) === this.props.G.cells[id].player) {
+        && !R.equals(this.props.G.board[id], EMPTY_FIELD)
+        && Number(this.props.ctx.currentPlayer) === this.props.G.board[id].player) {
         console.log('Select cell');
         this.setState({
           selectedCellId: id
@@ -51,7 +66,7 @@ export class Board extends React.Component<IBoardProps, {}> {
       }
       if (this.state.selectedCellId
         && id !== this.state.selectedCellId
-        && R.equals(this.props.G.cells[id], EMPTY_FIELD)) {
+        && R.equals(this.props.G.board[id], EMPTY_FIELD)) {
         console.log('Move');
         const moveTo = id;
         const moveFrom = this.state.selectedCellId;
@@ -62,13 +77,27 @@ export class Board extends React.Component<IBoardProps, {}> {
       }
       if (this.state.selectedCellId
         && id !== this.state.selectedCellId
-        && this.props.G.cells[id].player !== Number(this.props.ctx.currentPlayer)) {
+        && this.props.G.board[id].player !== Number(this.props.ctx.currentPlayer)) {
         console.log('Knock out');
       }
     }
     if (isAIGame(this.props.gameArgs)) {
       setTimeout(this.props.step, 250);
     }
+  };
+
+
+  _onClick = (coords: IAlgebraicCoords) => {
+    const position = algebraicToCartesian(coords.square);
+    console.log('onClick');
+    // if (this.state.selected === null && this._isSelectable(position)) {
+    //   this.setState({
+    //     ...this.state,
+    //     selected: position,
+    //   });
+    // } else {
+    //   this._move(position);
+    // }
   };
 
   _getStatus() {
@@ -155,9 +184,9 @@ export class Board extends React.Component<IBoardProps, {}> {
         );
 
         let overlay;
-        if (this.props.G.cells[id].player === 0) {
+        if (this.props.G.board[id].player === 0) {
           overlay = <Cross x={i} y={j} key={`cross${id}`} />;
-        } else if (this.props.G.cells[id].player === 1) {
+        } else if (this.props.G.board[id].player === 1) {
           overlay = <Circle x={i} y={j} key={`circle${id}`} />;
         }
         if (overlay) {
@@ -167,16 +196,52 @@ export class Board extends React.Component<IBoardProps, {}> {
     }
     return cells;
   }
+
+  getPieces = () => {
+    return this.props.G.board
+      .map((piece, index) => ({ data: piece, index }))
+      .filter(piece => piece.data !== null)
+      .map(piece => {
+        const { x, y } = toCoord(piece.index);
+        return (
+          <Token
+            x={x}
+            y={y}
+            draggable={true}
+            // shouldDrag={this._shouldDrag}
+            // onDrop={this._onDrop}
+            // onDrag={this._onDrag}
+            animate={true}
+            key={piece.data.id}
+          >
+            <g>
+              <circle r="0.4" fill={piece.data.player === 0 ? grey[50] : grey[900]} cx="0.5" cy="0.5" />
+              {/* {piece.data.isKing ? (
+                <circle r="0.2" cx="0.5" cy="0.5" fill={piece.data.playerID === '1' ? grey[800] : grey[400]} />
+              ) : null} */}
+            </g>
+          </Token>
+        );
+      });
+  };
+
   _getBoard() {
     return (
       <div>
         <Typography variant="h5" style={{ textAlign: 'center', color: 'white', marginBottom: '16px' }}>
           {this._getStatus()}
         </Typography>
-        <svg width="100%" height="100%" viewBox="0 0 6 7">
+        {/* <svg width="100%" height="100%" viewBox="0 0 6 7">
           {this._getCells()}
           {Lines}
-        </svg>
+        </svg> */}
+        <Checkerboard
+          onClick={this._onClick}
+          invert={true}
+        // highlightedSquares={this._getHighlightedSquares()}
+        >
+          {this.getPieces()}
+        </Checkerboard>
       </div>
     );
   }
