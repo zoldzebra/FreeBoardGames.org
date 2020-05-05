@@ -40,23 +40,30 @@ export class Board extends React.Component<IBoardProps, {}> {
       this.props.moves.placePiece(id);
     }
     if (this.props.ctx.phase === 'Move') {
-      console.log('Move phase id, selectedCellId', this.props.G.cells[id], this.state.selectedCellId);
+      console.log('Move phase');
       if (!this.state.selectedCellId
-        && !R.equals(this.props.G.cells[id], EMPTY_FIELD)) {
-        console.log('select cell');
+        && !R.equals(this.props.G.cells[id], EMPTY_FIELD)
+        && Number(this.props.ctx.currentPlayer) === this.props.G.cells[id].player) {
+        console.log('Select cell');
         this.setState({
           selectedCellId: id
         });
       }
       if (this.state.selectedCellId
-        && id !== this.state.selectedCellId) {
-        console.log('move');
+        && id !== this.state.selectedCellId
+        && R.equals(this.props.G.cells[id], EMPTY_FIELD)) {
+        console.log('Move');
         const moveTo = id;
         const moveFrom = this.state.selectedCellId;
-        this.props.moves.dummyMovePiece(moveFrom, moveTo);
+        this.props.moves.movePiece(moveFrom, moveTo);
         this.setState({
           selectedCellId: null,
         });
+      }
+      if (this.state.selectedCellId
+        && id !== this.state.selectedCellId
+        && this.props.G.cells[id].player !== Number(this.props.ctx.currentPlayer)) {
+        console.log('Knock out');
       }
     }
     if (isAIGame(this.props.gameArgs)) {

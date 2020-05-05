@@ -61,9 +61,7 @@ export function isVictory(cells: number[]) {
 }
 
 export function placePiece(G: IG, ctx: any, id: number) {
-
   const cells = [...G.cells];
-  console.log('cells', cells);
 
   if (R.equals(cells[id], EMPTY_FIELD)) {
     console.log('place to cell', cells[id]);
@@ -80,21 +78,16 @@ export function placePiece(G: IG, ctx: any, id: number) {
   }
 }
 
-export function dummyMovePiece(G: IG, ctx: any, moveFrom: number, moveTo: number) {
-  console.log('move fn: moveFrom, moveTo', moveFrom, moveTo);
+export function movePiece(G: IG, ctx: any, moveFrom: number, moveTo: number) {
+  console.log('movePiece: moveFrom, moveTo', moveFrom, moveTo);
   const cells = [...G.cells];
-  console.log('cells moveTo content', cells[moveTo]);
-  if (R.equals(cells[moveTo], EMPTY_FIELD)) {
-    console.log('move piece on cell id', moveTo);
-    cells[moveTo] = cells[moveFrom]
-    cells[moveFrom] = EMPTY_FIELD;
-    const newG = {
-      ...G,
-      cells,
-    }
-    console.log('newG', newG);
-    return { ...newG };
+  cells[moveTo] = cells[moveFrom]
+  cells[moveFrom] = EMPTY_FIELD;
+  const newG = {
+    ...G,
+    cells,
   }
+  return { ...newG };
 }
 
 export const KaticaGame = Game({
@@ -107,7 +100,7 @@ export const KaticaGame = Game({
 
   moves: {
     placePiece,
-    dummyMovePiece,
+    movePiece,
   },
 
   flow: {
@@ -120,7 +113,7 @@ export const KaticaGame = Game({
         endPhaseIf: (G: IG) => G.piecesPlaced === 4,
       },
       Move: {
-        allowedMoves: ['dummyMovePiece'],
+        allowedMoves: ['movePiece'],
       },
     },
 
