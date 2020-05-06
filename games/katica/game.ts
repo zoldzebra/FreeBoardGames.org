@@ -6,7 +6,7 @@
  * https://opensource.org/licenses/MIT.
  */
 
-import { Game } from '@freeboardgame.org/boardgame.io/core';
+import { Game, INVALID_MOVE } from '@freeboardgame.org/boardgame.io/core';
 
 import * as R from 'ramda';
 
@@ -42,6 +42,19 @@ export const EMPTY_FIELD = {
   player: null,
   piece: null,
 };
+
+const VALID_MOVES = [
+  [
+    { x: 1, y: 0 },
+    { x: 1, y: -1 },
+    { x: 1, y: 1 },
+    { x: 0, y: 1 },
+    { x: 0, y: -1 },
+    { x: -1, y: 0 },
+    { x: -1, y: -1 },
+    { x: -1, y: 1 },
+  ],
+];
 
 const initialBoard = Array(6 * 7).fill(EMPTY_FIELD);
 
@@ -104,16 +117,32 @@ export function placePiece(G: IG, ctx: any, boardIndex: number) {
   return { ...newG };
 }
 
+
+
 export function movePiece(G: IG, ctx: any, moveFrom: ICoord, moveTo: ICoord) {
   console.log('movePiece: moveFrom, moveTo', moveFrom, moveTo);
   const board = [...G.board];
-  board[toIndex(moveTo)] = board[toIndex(moveFrom)];
-  board[toIndex(moveFrom)] = EMPTY_FIELD;
-  const newG = {
-    ...G,
-    board,
+
+  const validMoves = VALID_MOVES[0].map(dir => {
+    return {
+      x: moveFrom.x + dir.x,
+      y: moveFrom.y + dir.y,
+    }
+  })
+  if (!validMoves.find(dir => R.equals(dir, moveTo))) {
+    console.log('invalid move');
+    return INVALID_MOVE;
+  } else {
+    console.log('valid move');
+
+    board[toIndex(moveTo)] = board[toIndex(moveFrom)];
+    board[toIndex(moveFrom)] = EMPTY_FIELD;
+    const newG = {
+      ...G,
+      board,
+    }
+    return { ...newG };
   }
-  return { ...newG };
 }
 
 export const KaticaGame = Game({

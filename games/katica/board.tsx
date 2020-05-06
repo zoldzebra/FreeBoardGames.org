@@ -272,9 +272,6 @@ export class Board extends React.Component<IBoardProps, {}> {
           >
             <g>
               <circle r="0.4" fill={piece.data.player === 0 ? red[500] : green[500]} cx="0.5" cy="0.5" />
-              {/* {piece.data.isKing ? (
-                <circle r="0.2" cx="0.5" cy="0.5" fill={piece.data.playerID === '1' ? grey[800] : grey[400]} />
-              ) : null} */}
             </g>
           </Token>
         );
@@ -287,10 +284,6 @@ export class Board extends React.Component<IBoardProps, {}> {
         <Typography variant="h5" style={{ textAlign: 'center', color: 'white', marginBottom: '16px' }}>
           {this._getStatus()}
         </Typography>
-        {/* <svg width="100%" height="100%" viewBox="0 0 6 7">
-          {this._getCells()}
-          {Lines}
-        </svg> */}
         <Checkerboard
           onClick={this._onClick}
           invert={true}
