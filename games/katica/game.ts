@@ -181,16 +181,17 @@ export function getValidMoves(G: IG, ctx: any, moveFrom: ICoord) {
   }
 
   const possibleMoves = ALL_MOVES[moveSet]
-    .map(dir => {
-      let newX = moveFrom.x + dir.x;
-      let newY = moveFrom.y + dir.y;
+    .map(move => {
+      let newX = moveFrom.x + move.x;
+      let newY = moveFrom.y + move.y;
       return {
         x: newX,
         y: newY,
       }
     })
-    .filter(dir => (dir.x <= 5 && dir.x >= 0) && (dir.y <= 6 && dir.y >= 0));
-  // check for jumping over opponent moves
+    .filter(coords => (coords.x <= 5 && coords.x >= 0) && (coords.y <= 6 && coords.y >= 0))
+    .filter(coords => board[toIndex(coords)].player !== Number(ctx.currentPlayer));
+  // check for jumping over opponent
   const otherPlayer = ctx.currentPlayer === '0' ? 1 : 0;
   const opponentFields = possibleMoves.filter(coords => board[toIndex(coords)].player === otherPlayer);
   console.log('opponentFields', opponentFields);
@@ -238,10 +239,6 @@ export function getValidMoves(G: IG, ctx: any, moveFrom: ICoord) {
         }
         return false;
       });
-      if (standsInTheWay) {
-        console.log('shadowed out by opp', coords);
-        return;
-      }
       if (!standsInTheWay) {
         return coords;
       }

@@ -128,11 +128,11 @@ export class Board extends React.Component<IBoardProps, {}> {
     if (selected !== null) {
       const { G, ctx } = this.props;
       const otherPlayer = ctx.currentPlayer === '0' ? 1 : 0;
-      result[cartesianToAlgebraic(selected.x, selected.y, false)] = blue[700];
+      result[cartesianToAlgebraic(selected.x, selected.y, false)] = blue[200];
       const validMoves = getValidMoves(G, ctx, selected);
       validMoves && validMoves.forEach(field => {
         if (G.board[toIndex(field)].player === otherPlayer) {
-          result[cartesianToAlgebraic(field.x, field.y, false)] = red[300];
+          result[cartesianToAlgebraic(field.x, field.y, false)] = blue[400];
         } else {
           result[cartesianToAlgebraic(field.x, field.y, false)] = blue[300];
         }
@@ -235,9 +235,9 @@ export class Board extends React.Component<IBoardProps, {}> {
       return (
         <g>
           <circle r="0.4" fill={piece.data.player === 0 ? red[900] : orange[500]} cx="0.5" cy="0.5" />
-          <circle r="0.1" fill={grey[900]} cx="0.35" cy="0.4" />
-          <circle r="0.1" fill={grey[900]} cx="0.65" cy="0.4" />
-          <circle r="0.1" fill={grey[900]} cx="0.5" cy="0.7" />
+          <circle r="0.1" fill={grey[900]} cx="0.35" cy="0.6" />
+          <circle r="0.1" fill={grey[900]} cx="0.65" cy="0.6" />
+          <circle r="0.1" fill={grey[900]} cx="0.5" cy="0.35" />
         </g>
       )
     }
