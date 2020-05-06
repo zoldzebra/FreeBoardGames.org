@@ -126,12 +126,16 @@ export class Board extends React.Component<IBoardProps, {}> {
 
     if (selected !== null) {
       const { G, ctx } = this.props;
+      const otherPlayer = ctx.currentPlayer === '0' ? 1 : 0;
       result[cartesianToAlgebraic(selected.x, selected.y, false)] = blue[700];
       const validMoves = getValidMoves(G, ctx, selected);
       validMoves && validMoves.forEach(field => {
-        result[cartesianToAlgebraic(field.x, field.y, false)] = blue[300];
+        if (G.board[toIndex(field)].player === otherPlayer) {
+          result[cartesianToAlgebraic(field.x, field.y, false)] = red[300];
+        } else {
+          result[cartesianToAlgebraic(field.x, field.y, false)] = blue[300];
+        }
       })
-
       // this.state.validMoves
       //   .filter(move => areCoordsEqual(this.state.selected, move.from))
       //   .forEach(move => {

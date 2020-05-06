@@ -190,45 +190,74 @@ export function getValidMoves(G: IG, ctx: any, moveFrom: ICoord) {
       }
     })
     .filter(dir => (dir.x <= 5 && dir.x >= 0) && (dir.y <= 6 && dir.y >= 0));
-  // // check for jumping over opponent moves
-  // const otherPlayer = ctx.currentPlayer === '0' ? 1 : 0;
-  // const opponentFields = possibleMoves.filter(coords => board[toIndex(coords)].player === otherPlayer);
-  // // console.log('opponentFields', opponentFields);
-  // let validMoves = [];
-  // if (opponentFields) {
-  //   validMoves = possibleMoves.filter(coords => {
-  //     // x axis
-  //     if (coords.y === moveFrom.y) {
-  //       const xDiff = coords.x - moveFrom.x;
-  //       if (Math.abs(xDiff) === 1) {
-  //         return coords;
-  //       }
-  //       if (!(xDiff > 1 // to the left from start
-  //         && (opponentFields.find(field => R.equals(field, { x: coords.x - 1, y: coords.y }))
-  //           || opponentFields.find(field => R.equals(field, { x: coords.x - 2, y: coords.y }))))) {
-  //         return coords;
-  //       }
-  //       if (!(xDiff < -1 // to the right from start
-  //         && (opponentFields.find(field => R.equals(field, { x: coords.x + 1, y: coords.y }))
-  //           || opponentFields.find(field => R.equals(field, { x: coords.x + 2, y: coords.y }))))) {
-  //         return coords;
-  //       }
-  //     }
-  //   })
-  // } else {
-  // }
-  const validMoves = [...possibleMoves];
+  // check for jumping over opponent moves
+  const otherPlayer = ctx.currentPlayer === '0' ? 1 : 0;
+  const opponentFields = possibleMoves.filter(coords => board[toIndex(coords)].player === otherPlayer);
+  console.log('opponentFields', opponentFields);
+  let validMoves = [];
+  if (opponentFields) {
+    const vectorsToOpponents = opponentFields.map(opponent => {
+      return {
+        x: opponent.x - moveFrom.x,
+        y: opponent.y - moveFrom.y,
+      };
+    });
+    console.log('vectorsToOpponents', vectorsToOpponents);
+    validMoves = possibleMoves.filter(coords => {
+      const vectorToMove = {
+        x: coords.x - moveFrom.x,
+        y: coords.y - moveFrom.y
+      };
+      const standsInTheWay = vectorsToOpponents.some(vectorToOpp => {
+        if (vectorToOpp.y === 0
+          && vectorToMove.y === 0
+          && vectorToOpp.x !== vectorToMove.x
+          && Math.sign(vectorToOpp.x) === Math.sign(vectorToMove.x)
+          && Math.abs(vectorToMove.x) > Math.abs(vectorToOpp.x)) {
+          console.log('opponent on X, vector:', vectorToOpp);
+          console.log('shadowing move vector', vectorToMove);
+          return true;
+        }
+        if (vectorToOpp.x === 0
+          && vectorToMove.x === 0
+          && vectorToOpp.y !== vectorToMove.y
+          && Math.sign(vectorToOpp.y) === Math.sign(vectorToMove.y)
+          && Math.abs(vectorToMove.y) > Math.abs(vectorToOpp.y)) {
+          console.log('opponent on y, vector:', vectorToOpp);
+          console.log('shadowing move vector', vectorToMove);
+          return true;
+        }
+        if (Math.abs(vectorToOpp.x) === Math.abs(vectorToOpp.y)
+          && Math.abs(vectorToMove.x) === Math.abs(vectorToMove.y)
+          && Math.sign(vectorToOpp.x) === Math.sign(vectorToMove.x)
+          && Math.sign(vectorToOpp.y) === Math.sign(vectorToMove.y)
+          && Math.abs(vectorToMove.x) > Math.abs(vectorToOpp.x)
+          && Math.abs(vectorToMove.y) > Math.abs(vectorToOpp.y)) {
+          console.log('diagonal shadow')
+          return true;
+        }
+        return false;
+      });
+      if (standsInTheWay) {
+        console.log('shadowed out by opp', coords);
+        return;
+      }
+      if (!standsInTheWay) {
+        return coords;
+      }
+    });
+  } else {
+    validMoves = [...possibleMoves];
+  }
 
-  console.log('possibleMoves.length', possibleMoves.length);
-  // console.log('opponentFields.length', opponentFields.length);
+  // console.log('possibleMoves.length', possibleMoves.length);
+  console.log('opponentFields.length', opponentFields.length);
   console.log('validMoves', validMoves);
 
   console.log('validMoves.length', validMoves.length);
 
   return validMoves;
 }
-
-
 
 export function movePiece(G: IG, ctx: any, moveFrom: ICoord, moveTo: ICoord) {
   const validMoves = getValidMoves(G, ctx, moveFrom);
