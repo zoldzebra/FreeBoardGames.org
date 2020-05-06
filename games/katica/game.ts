@@ -43,7 +43,7 @@ export const EMPTY_FIELD = {
   pieceType: null,
 };
 
-const VALID_MOVES = [
+const ALL_MOVES = [
   [
     { x: 1, y: 0 },
     { x: 1, y: -1 },
@@ -173,26 +173,68 @@ export function placePiece(G: IG, ctx: any, boardIndex: number) {
   return { ...newG };
 }
 
+export function getValidMoves(G: IG, ctx: any, moveFrom: ICoord) {
+  const board = [...G.board];
+  const moveSet = board[toIndex(moveFrom)].pieceType - 1;
+  if (moveSet < 0) {
+    return;
+  }
+
+  const possibleMoves = ALL_MOVES[moveSet]
+    .map(dir => {
+      let newX = moveFrom.x + dir.x;
+      let newY = moveFrom.y + dir.y;
+      return {
+        x: newX,
+        y: newY,
+      }
+    })
+    .filter(dir => (dir.x <= 5 && dir.x >= 0) && (dir.y <= 6 && dir.y >= 0));
+  // // check for jumping over opponent moves
+  // const otherPlayer = ctx.currentPlayer === '0' ? 1 : 0;
+  // const opponentFields = possibleMoves.filter(coords => board[toIndex(coords)].player === otherPlayer);
+  // // console.log('opponentFields', opponentFields);
+  // let validMoves = [];
+  // if (opponentFields) {
+  //   validMoves = possibleMoves.filter(coords => {
+  //     // x axis
+  //     if (coords.y === moveFrom.y) {
+  //       const xDiff = coords.x - moveFrom.x;
+  //       if (Math.abs(xDiff) === 1) {
+  //         return coords;
+  //       }
+  //       if (!(xDiff > 1 // to the left from start
+  //         && (opponentFields.find(field => R.equals(field, { x: coords.x - 1, y: coords.y }))
+  //           || opponentFields.find(field => R.equals(field, { x: coords.x - 2, y: coords.y }))))) {
+  //         return coords;
+  //       }
+  //       if (!(xDiff < -1 // to the right from start
+  //         && (opponentFields.find(field => R.equals(field, { x: coords.x + 1, y: coords.y }))
+  //           || opponentFields.find(field => R.equals(field, { x: coords.x + 2, y: coords.y }))))) {
+  //         return coords;
+  //       }
+  //     }
+  //   })
+  // } else {
+  // }
+  const validMoves = [...possibleMoves];
+
+  console.log('possibleMoves.length', possibleMoves.length);
+  // console.log('opponentFields.length', opponentFields.length);
+  console.log('validMoves', validMoves);
+
+  console.log('validMoves.length', validMoves.length);
+
+  return validMoves;
+}
+
 
 
 export function movePiece(G: IG, ctx: any, moveFrom: ICoord, moveTo: ICoord) {
-  console.log('movePiece: moveFrom, moveTo', moveFrom, moveTo);
+  const validMoves = getValidMoves(G, ctx, moveFrom);
   const board = [...G.board];
-  const moveSet = board[toIndex(moveFrom)].pieceType - 1;
-  const validMoves = VALID_MOVES[moveSet].map(dir => {
-    let newX = moveFrom.x + dir.x;
-    let newY = moveFrom.y + dir.y;
-    if ((newX < 0) || (newX > 5)) {
-      newX = null;
-    }
-    if ((newY < 0) || (newY > 6)) {
-      newY = null;
-    }
-    return {
-      x: newX,
-      y: newY,
-    }
-  })
+
+  // check if chosen move is in validMoves
   if (!validMoves.find(dir => R.equals(dir, moveTo))) {
     console.log('invalid move');
     return INVALID_MOVE;

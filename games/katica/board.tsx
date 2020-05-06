@@ -12,12 +12,13 @@ import Typography from '@material-ui/core/Typography';
 import red from '@material-ui/core/colors/red';
 import green from '@material-ui/core/colors/green';
 import grey from '@material-ui/core/colors/grey';
+import blue from '@material-ui/core/colors/blue';
 
 import { IGameArgs } from 'components/App/Game/GameBoardWrapper';
 import { GameLayout } from 'components/App/Game/GameLayout';
 import { Circle, Cross, Field, Lines } from './Shapes';
 import { isOnlineGame, isAIGame } from '../common/gameMode';
-import { IG, Piece, EMPTY_FIELD, toCoord, toIndex, IMove, areCoordsEqual } from './game';
+import { IG, Piece, EMPTY_FIELD, toCoord, toIndex, IMove, areCoordsEqual, getValidMoves } from './game';
 import { Token } from '@freeboardgame.org/boardgame.io/ui';
 import {
   Checkerboard,
@@ -40,7 +41,6 @@ interface IBoardProps {
 }
 
 interface IBoardState {
-  selectedCellId: number | null;
   selected: ICartesianCoords;
 }
 
@@ -50,7 +50,6 @@ function roundCoords(coords: ICartesianCoords) {
 
 export class Board extends React.Component<IBoardProps, {}> {
   state: IBoardState = {
-    selectedCellId: null,
     selected: null,
   };
 
@@ -59,43 +58,6 @@ export class Board extends React.Component<IBoardProps, {}> {
     return true;
   }
 
-  onClickField = (id: number) => () => {
-    console.log('onClickField');
-    if (this.props.ctx.phase === 'Place') {
-      this.props.moves.placePiece(id);
-    }
-    if (this.props.ctx.phase === 'Move') {
-      console.log('Move phase');
-      if (!this.state.selectedCellId
-        && !R.equals(this.props.G.board[id], EMPTY_FIELD)
-        && Number(this.props.ctx.currentPlayer) === this.props.G.board[id].player) {
-        console.log('Select cell');
-        this.setState({
-          selectedCellId: id
-        });
-      }
-      if (this.state.selectedCellId
-        && id !== this.state.selectedCellId
-        && R.equals(this.props.G.board[id], EMPTY_FIELD)) {
-        console.log('Move');
-        const moveTo = id;
-        const moveFrom = this.state.selectedCellId;
-        this.props.moves.movePiece(moveFrom, moveTo);
-        this.setState({
-          selectedCellId: null,
-        });
-      }
-      if (this.state.selectedCellId
-        && id !== this.state.selectedCellId
-        && this.props.G.board[id].player !== Number(this.props.ctx.currentPlayer)) {
-        console.log('Knock out');
-      }
-    }
-    if (isAIGame(this.props.gameArgs)) {
-      setTimeout(this.props.step, 250);
-    }
-  };
-
   shouldPlace = (coords: ICartesianCoords) => {
     return R.equals(this.props.G.board[toIndex(coords)], EMPTY_FIELD);
   }
@@ -103,7 +65,7 @@ export class Board extends React.Component<IBoardProps, {}> {
   _shouldDrag = (coords: ICartesianCoords) => {
     if (this.props.ctx.phase === 'Move') {
       const invertedCoords = applyInvertion(coords, this.isInverted());
-      console.log('coords inverted', applyInvertion(coords, this.isInverted()))
+      // console.log('coords inverted', applyInvertion(coords, this.isInverted()))
       return this.props.G.board[toIndex(invertedCoords)].player === Number(this.props.ctx.currentPlayer);
     }
   };
@@ -157,6 +119,29 @@ export class Board extends React.Component<IBoardProps, {}> {
     //   this.stepAI();
     // }
   };
+
+  _getHighlightedSquares() {
+    const { selected } = this.state;
+    const result = {} as IColorMap;
+
+    if (selected !== null) {
+      const { G, ctx } = this.props;
+      result[cartesianToAlgebraic(selected.x, selected.y, false)] = blue[700];
+      const validMoves = getValidMoves(G, ctx, selected);
+      validMoves && validMoves.forEach(field => {
+        result[cartesianToAlgebraic(field.x, field.y, false)] = blue[300];
+      })
+
+      // this.state.validMoves
+      //   .filter(move => areCoordsEqual(this.state.selected, move.from))
+      //   .forEach(move => {
+      //     result[cartesianToAlgebraic(move.to.x, move.to.y, false)] = blue[500];
+      //   });
+    }
+    console.log('result length', Object.keys(result).length);
+
+    return result;
+  }
 
   _getStatus() {
     if (isOnlineGame(this.props.gameArgs)) {
@@ -223,36 +208,6 @@ export class Board extends React.Component<IBoardProps, {}> {
     return <GameLayout gameArgs={this.props.gameArgs}>{this._getBoard()}</GameLayout>;
   }
 
-  _getCells() {
-    const cells = [];
-    for (let i = 0; i < 6; i++) {
-      for (let j = 0; j < 7; j++) {
-        const id = 7 * i + j;
-        cells.push(
-          <Field
-            x={i}
-            y={j}
-            key={`${id}`}
-            id={id}
-            onClick={this.onClickField(id)}
-            isSelected={id === this.state.selectedCellId}
-          />
-        );
-
-        let overlay;
-        if (this.props.G.board[id].player === 0) {
-          overlay = <Cross x={i} y={j} key={`cross${id}`} />;
-        } else if (this.props.G.board[id].player === 1) {
-          overlay = <Circle x={i} y={j} key={`circle${id}`} />;
-        }
-        if (overlay) {
-          cells.push(overlay);
-        }
-      }
-    }
-    return cells;
-  }
-
   drawPiece = (piece: { data: Piece, index: number }) => {
     if (piece.data.pieceType === 1) {
       return (
@@ -315,7 +270,7 @@ export class Board extends React.Component<IBoardProps, {}> {
         <Checkerboard
           onClick={this._onClick}
           invert={true}
-        // highlightedSquares={this._getHighlightedSquares()}
+          highlightedSquares={this._getHighlightedSquares()}
         >
           {this.getPieces()}
         </Checkerboard>
@@ -326,10 +281,7 @@ export class Board extends React.Component<IBoardProps, {}> {
   _getGameOverBoard() {
     return (
       <div style={{ textAlign: 'center' }}>
-        <svg width="50%" height="50%" viewBox="0 0 6 7">
-          {this._getCells()}
-          {Lines}
-        </svg>
+        GAME OVER
       </div>
     );
   }
