@@ -54,6 +54,54 @@ const VALID_MOVES = [
     { x: -1, y: -1 },
     { x: -1, y: 1 },
   ],
+  [
+    { x: 1, y: 0 },
+    { x: 1, y: -1 },
+    { x: 1, y: 1 },
+    { x: 0, y: 1 },
+    { x: 0, y: -1 },
+    { x: -1, y: 0 },
+    { x: -1, y: -1 },
+    { x: -1, y: 1 },
+
+    { x: 2, y: 0 },
+    { x: 2, y: -2 },
+    { x: 2, y: 2 },
+    { x: 0, y: 2 },
+    { x: 0, y: -2 },
+    { x: -2, y: 0 },
+    { x: -2, y: -2 },
+    { x: -2, y: 2 },
+  ],
+  [
+    { x: 1, y: 0 },
+    { x: 1, y: -1 },
+    { x: 1, y: 1 },
+    { x: 0, y: 1 },
+    { x: 0, y: -1 },
+    { x: -1, y: 0 },
+    { x: -1, y: -1 },
+    { x: -1, y: 1 },
+
+    { x: 2, y: 0 },
+    { x: 2, y: -2 },
+    { x: 2, y: 2 },
+    { x: 0, y: 2 },
+    { x: 0, y: -2 },
+    { x: -2, y: 0 },
+    { x: -2, y: -2 },
+    { x: -2, y: 2 },
+
+
+    { x: 3, y: 0 },
+    { x: 3, y: -3 },
+    { x: 3, y: 3 },
+    { x: 0, y: 3 },
+    { x: 0, y: -3 },
+    { x: -3, y: 0 },
+    { x: -3, y: -3 },
+    { x: -3, y: 3 },
+  ],
 ];
 
 const initialBoard = Array(6 * 7).fill(EMPTY_FIELD);
@@ -104,10 +152,18 @@ export function areCoordsEqual(a: ICoord, b: ICoord) {
 
 export function placePiece(G: IG, ctx: any, boardIndex: number) {
   const board = [...G.board];
+  let pieceType = null;
+  if (ctx.turn < 2) {
+    pieceType = 1;
+  } else if (ctx.turn >= 2 && ctx.turn < 4) {
+    pieceType = 2;
+  } else {
+    pieceType = 3;
+  }
   board[boardIndex] = {
     id: ctx.turn,
     player: Number(ctx.currentPlayer),
-    pieceType: 1,
+    pieceType,
   };
   const newG: IG = {
     ...G,
@@ -173,7 +229,7 @@ export const KaticaGame = Game({
       Place: {
         allowedMoves: ['placePiece'],
         next: Phase.Move,
-        endPhaseIf: (G: IG) => G.piecesPlaced === 4,
+        endPhaseIf: (G: IG) => G.piecesPlaced === 6,
       },
       Move: {
         allowedMoves: ['movePiece'],
