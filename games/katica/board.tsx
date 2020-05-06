@@ -118,13 +118,11 @@ export class Board extends React.Component<IBoardProps, {}> {
   };
 
   _onDrag = (coords: IOnDragData) => {
-    console.log('onDrag coords', coords);
     const x = coords.x;
     const y = coords.y;
     const originalX = coords.originalX;
     const originalY = coords.originalY;
     if (Math.sqrt((x - originalX) ** 2 + (y - originalY) ** 2) > 0.2) {
-      console.log('onDrag calculation true');
       this.setState({
         ...this.state,
         selected: applyInvertion({ x: originalX, y: originalY }, this.isInverted()),
