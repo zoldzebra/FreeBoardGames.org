@@ -11,6 +11,7 @@ import * as R from 'ramda';
 import Typography from '@material-ui/core/Typography';
 import red from '@material-ui/core/colors/red';
 import green from '@material-ui/core/colors/green';
+import grey from '@material-ui/core/colors/grey';
 
 import { IGameArgs } from 'components/App/Game/GameBoardWrapper';
 import { GameLayout } from 'components/App/Game/GameLayout';
@@ -252,6 +253,36 @@ export class Board extends React.Component<IBoardProps, {}> {
     return cells;
   }
 
+  drawPiece = (piece: { data: Piece, index: number }) => {
+    if (piece.data.pieceType === 1) {
+      return (
+        <g>
+          <circle r="0.4" fill={piece.data.player === 0 ? red[500] : green[500]} cx="0.5" cy="0.5" />
+          <circle r="0.1" fill={grey[900]} cx="0.5" cy="0.5" />
+        </g>
+      )
+    }
+    if (piece.data.pieceType === 2) {
+      return (
+        <g>
+          <circle r="0.4" fill={piece.data.player === 0 ? red[500] : green[500]} cx="0.5" cy="0.5" />
+          <circle r="0.1" fill={grey[900]} cx="0.35" cy="0.5" />
+          <circle r="0.1" fill={grey[900]} cx="0.65" cy="0.5" />
+        </g>
+      )
+    }
+    if (piece.data.pieceType === 3) {
+      return (
+        <g>
+          <circle r="0.4" fill={piece.data.player === 0 ? red[500] : green[500]} cx="0.5" cy="0.5" />
+          <circle r="0.1" fill={grey[900]} cx="0.35" cy="0.4" />
+          <circle r="0.1" fill={grey[900]} cx="0.65" cy="0.4" />
+          <circle r="0.1" fill={grey[900]} cx="0.5" cy="0.7" />
+        </g>
+      )
+    }
+  }
+
   getPieces = () => {
     return this.props.G.board
       .map((piece, index) => ({ data: piece, index }))
@@ -269,9 +300,7 @@ export class Board extends React.Component<IBoardProps, {}> {
             animate={true}
             key={piece.data.id}
           >
-            <g>
-              <circle r="0.4" fill={piece.data.player === 0 ? red[500] : green[500]} cx="0.5" cy="0.5" />
-            </g>
+            {this.drawPiece(piece)}
           </Token>
         );
       });

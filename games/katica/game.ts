@@ -122,7 +122,8 @@ export function placePiece(G: IG, ctx: any, boardIndex: number) {
 export function movePiece(G: IG, ctx: any, moveFrom: ICoord, moveTo: ICoord) {
   console.log('movePiece: moveFrom, moveTo', moveFrom, moveTo);
   const board = [...G.board];
-  const validMoves = VALID_MOVES[0].map(dir => {
+  const moveSet = board[toIndex(moveFrom)].pieceType - 1;
+  const validMoves = VALID_MOVES[moveSet].map(dir => {
     let newX = moveFrom.x + dir.x;
     let newY = moveFrom.y + dir.y;
     if ((newX < 0) || (newX > 5)) {
