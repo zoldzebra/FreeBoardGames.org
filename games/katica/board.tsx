@@ -209,7 +209,6 @@ export class Board extends React.Component<IBoardProps, {}> {
     }
   }
 
-
   render() {
     if (this.props.ctx.gameover) {
       return (

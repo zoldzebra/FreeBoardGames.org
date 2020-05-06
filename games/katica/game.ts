@@ -18,7 +18,7 @@ export enum Phase {
 export interface Piece {
   id: number | null,
   player: number | null,
-  piece: number | null,
+  pieceType: number | null,
 }
 
 export interface IG {
@@ -40,7 +40,7 @@ export interface IMove {
 export const EMPTY_FIELD = {
   id: null,
   player: null,
-  piece: null,
+  pieceType: null,
 };
 
 const VALID_MOVES = [
@@ -107,7 +107,7 @@ export function placePiece(G: IG, ctx: any, boardIndex: number) {
   board[boardIndex] = {
     id: ctx.turn,
     player: Number(ctx.currentPlayer),
-    piece: 1,
+    pieceType: 1,
   };
   const newG: IG = {
     ...G,
@@ -122,11 +122,18 @@ export function placePiece(G: IG, ctx: any, boardIndex: number) {
 export function movePiece(G: IG, ctx: any, moveFrom: ICoord, moveTo: ICoord) {
   console.log('movePiece: moveFrom, moveTo', moveFrom, moveTo);
   const board = [...G.board];
-
   const validMoves = VALID_MOVES[0].map(dir => {
+    let newX = moveFrom.x + dir.x;
+    let newY = moveFrom.y + dir.y;
+    if ((newX < 0) || (newX > 5)) {
+      newX = null;
+    }
+    if ((newY < 0) || (newY > 6)) {
+      newY = null;
+    }
     return {
-      x: moveFrom.x + dir.x,
-      y: moveFrom.y + dir.y,
+      x: newX,
+      y: newY,
     }
   })
   if (!validMoves.find(dir => R.equals(dir, moveTo))) {
@@ -134,7 +141,6 @@ export function movePiece(G: IG, ctx: any, moveFrom: ICoord, moveTo: ICoord) {
     return INVALID_MOVE;
   } else {
     console.log('valid move');
-
     board[toIndex(moveTo)] = board[toIndex(moveFrom)];
     board[toIndex(moveFrom)] = EMPTY_FIELD;
     const newG = {
