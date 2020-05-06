@@ -13,6 +13,7 @@ import red from '@material-ui/core/colors/red';
 import green from '@material-ui/core/colors/green';
 import grey from '@material-ui/core/colors/grey';
 import blue from '@material-ui/core/colors/blue';
+import orange from '@material-ui/core/colors/orange';
 
 import { IGameArgs } from 'components/App/Game/GameBoardWrapper';
 import { GameLayout } from 'components/App/Game/GameLayout';
@@ -160,7 +161,7 @@ export class Board extends React.Component<IBoardProps, {}> {
         case '0':
           return "Red's turn";
         case '1':
-          return "Green's turn";
+          return "Orange's turn";
       }
     }
   }
@@ -216,7 +217,7 @@ export class Board extends React.Component<IBoardProps, {}> {
     if (piece.data.pieceType === 1) {
       return (
         <g>
-          <circle r="0.4" fill={piece.data.player === 0 ? red[500] : green[500]} cx="0.5" cy="0.5" />
+          <circle r="0.4" fill={piece.data.player === 0 ? red[900] : orange[500]} cx="0.5" cy="0.5" />
           <circle r="0.1" fill={grey[900]} cx="0.5" cy="0.5" />
         </g>
       )
@@ -224,7 +225,7 @@ export class Board extends React.Component<IBoardProps, {}> {
     if (piece.data.pieceType === 2) {
       return (
         <g>
-          <circle r="0.4" fill={piece.data.player === 0 ? red[500] : green[500]} cx="0.5" cy="0.5" />
+          <circle r="0.4" fill={piece.data.player === 0 ? red[900] : orange[500]} cx="0.5" cy="0.5" />
           <circle r="0.1" fill={grey[900]} cx="0.35" cy="0.5" />
           <circle r="0.1" fill={grey[900]} cx="0.65" cy="0.5" />
         </g>
@@ -233,7 +234,7 @@ export class Board extends React.Component<IBoardProps, {}> {
     if (piece.data.pieceType === 3) {
       return (
         <g>
-          <circle r="0.4" fill={piece.data.player === 0 ? red[500] : green[500]} cx="0.5" cy="0.5" />
+          <circle r="0.4" fill={piece.data.player === 0 ? red[900] : orange[500]} cx="0.5" cy="0.5" />
           <circle r="0.1" fill={grey[900]} cx="0.35" cy="0.4" />
           <circle r="0.1" fill={grey[900]} cx="0.65" cy="0.4" />
           <circle r="0.1" fill={grey[900]} cx="0.5" cy="0.7" />
@@ -275,6 +276,8 @@ export class Board extends React.Component<IBoardProps, {}> {
           onClick={this._onClick}
           invert={true}
           highlightedSquares={this._getHighlightedSquares()}
+          primaryColor={green[900]}
+          secondaryColor={green[600]}
         >
           {this.getPieces()}
         </Checkerboard>
