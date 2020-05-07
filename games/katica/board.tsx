@@ -96,6 +96,7 @@ export class Board extends React.Component<IBoardProps, {}> {
       this.setState({
         ...this.state,
         selected: null,
+        validMovesHighlight: {},
       });
     }
   };
@@ -137,7 +138,7 @@ export class Board extends React.Component<IBoardProps, {}> {
         } else {
           result[cartesianToAlgebraic(field.x, field.y, false)] = blue[300];
         }
-      })
+      });
       this.setState({
         validMovesHighlight: { ...result },
       })
