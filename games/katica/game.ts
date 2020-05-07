@@ -103,7 +103,79 @@ const ALL_MOVES = [
   ],
 ];
 
-const initialBoard = Array(6 * 7).fill(EMPTY_FIELD);
+const ROWS = 7;
+const COLUMNS = 6;
+
+const initialBoard = Array(ROWS * COLUMNS).fill(EMPTY_FIELD);
+
+function checkForConnectedAreas(matrixCopy: number[][], col: number, row: number) {
+  if (matrixCopy[col][row] === null) {
+    return 0;
+  }
+  matrixCopy[col][row] = null;
+  let size = 1;
+  const directions = [
+    [0, 1],
+    [0, -1],
+    [1, 0],
+    [-1, 0],
+  ];
+
+  directions.forEach(dir => {
+    if (col + dir[0] < matrixCopy.length && row + dir[1] < matrixCopy[0].length) {
+      size += checkForConnectedAreas(matrixCopy, col + dir[0], row + dir[1]);
+    }
+  });
+
+  // for (
+  //   let r = row - 1 < 0 ? row : row - 1;
+  //   row + 1 >= matrixCopy[0].length ? r <= row : r <= row + 1;
+  //   r++
+  // ) {
+  //   for (
+  //     let c = col - 1 < 0 ? col : col - 1;
+  //     col + 1 >= matrixCopy.length ? c < col : c <= col + 1;
+  //     c++
+  //   ) {
+  //     if (r !== row || c !== col) {
+  //       console.log('new loop for', matrixCopy[c][r], c, r);
+  //       size += checkForConnectedAreas(matrixCopy, c, r);
+  //     }
+  //   }
+  // }
+  return size;
+}
+
+function getMatchResult(G: IG) {
+  const boardMatrix: number[][] = Array(COLUMNS).fill(null).map(() => Array(ROWS).fill(null));
+
+  G.board.forEach((cell, index) => {
+    const coords = toCoord(index);
+    boardMatrix[coords.x][coords.y] = cell.player;
+  });
+
+  console.log('boardMatrix init', boardMatrix);
+
+  const matrixCopy = R.clone(boardMatrix);
+
+  let size = 0;
+
+  for (let col = 0; col < COLUMNS; col++) {
+    for (let row = 0; row < ROWS; row++) {
+      if (matrixCopy[col][row] === 1) {
+        // console.log('boardMatrix', boardMatrix);
+        console.log('init checking at', col, row);
+        size = checkForConnectedAreas(matrixCopy, col, row);
+        if (size > 0) {
+          console.log('Found group w size', size);
+        };
+      };
+    }
+  }
+  console.log('matrixCopy after changes', matrixCopy);
+
+  return null;
+}
 
 export function isVictory(cells: number[]) {
 
@@ -299,9 +371,10 @@ export const KaticaGame = Game({
     },
 
     endGameIf: (G, ctx) => {
-      if (isVictory(G.cells)) {
-        return { winner: ctx.currentPlayer };
-      }
+      // if (isVictory(G.cells)) {
+      //   return { winner: ctx.currentPlayer };
+      // }
+      getMatchResult(G);
       // if (G.cells.filter((c: any) => c === null).length === 0) {
       //   return { draw: true };
       // }

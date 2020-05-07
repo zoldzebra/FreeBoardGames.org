@@ -165,6 +165,7 @@ export class Board extends React.Component<IBoardProps, {}> {
   }
 
   _getGameOver() {
+
     if (isOnlineGame(this.props.gameArgs)) {
       // Online game
       if (this.props.ctx.gameover.winner !== undefined) {
@@ -199,6 +200,7 @@ export class Board extends React.Component<IBoardProps, {}> {
   }
 
   render() {
+    // console.log('props ', this.props);
     if (this.props.ctx.gameover) {
       return (
         <GameLayout
