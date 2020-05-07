@@ -134,7 +134,7 @@ export class Board extends React.Component<IBoardProps, {}> {
       const validMoves = getValidMoves(G, ctx, selected);
       validMoves && validMoves.forEach(field => {
         if (G.board[toIndex(field)].player === otherPlayer) {
-          result[cartesianToAlgebraic(field.x, field.y, false)] = blue[400];
+          result[cartesianToAlgebraic(field.x, field.y, false)] = red[400];
         } else {
           result[cartesianToAlgebraic(field.x, field.y, false)] = blue[300];
         }

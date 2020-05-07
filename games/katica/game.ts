@@ -174,7 +174,8 @@ export function placePiece(G: IG, ctx: any, boardIndex: number) {
 
 export function getValidMoves(G: IG, ctx: any, moveFrom: ICoord) {
   const board = [...G.board];
-  const moveSet = board[toIndex(moveFrom)].pieceType - 1;
+  const actualPieceType = board[toIndex(moveFrom)].pieceType;
+  const moveSet = actualPieceType - 1;
   if (moveSet < 0) {
     return;
   }
@@ -192,52 +193,59 @@ export function getValidMoves(G: IG, ctx: any, moveFrom: ICoord) {
     .filter(coords => board[toIndex(coords)].player !== Number(ctx.currentPlayer));
   const otherPlayer = ctx.currentPlayer === '0' ? 1 : 0;
   const opponentFields = possibleMoves.filter(coords => board[toIndex(coords)].player === otherPlayer);
-  // check for jumping over opponent
+  // dont jump over opponent + cant move over (knock out) too close opp
   let validMoves = [];
   if (opponentFields) {
     const vectorsToOpponents = opponentFields.map(opponent => {
       return {
         x: opponent.x - moveFrom.x,
         y: opponent.y - moveFrom.y,
+        distance: Math.max(Math.abs(opponent.x - moveFrom.x), Math.abs(opponent.y - moveFrom.y)),
       };
     });
-    validMoves = possibleMoves.filter(coords => {
-      const vectorToMove = {
-        x: coords.x - moveFrom.x,
-        y: coords.y - moveFrom.y
-      };
-      const standsInTheWay = vectorsToOpponents.some(vectorToOpp => {
-        // vertically
-        if (vectorToOpp.y === 0
-          && vectorToMove.y === 0
-          && vectorToOpp.x !== vectorToMove.x
-          && Math.sign(vectorToOpp.x) === Math.sign(vectorToMove.x)
-          && Math.abs(vectorToMove.x) > Math.abs(vectorToOpp.x)) {
-          return true;
+    validMoves = possibleMoves
+      .filter(coords => {
+        const vectorToMove = {
+          x: coords.x - moveFrom.x,
+          y: coords.y - moveFrom.y
+        };
+        const standsInTheWayOrTooClose = vectorsToOpponents.some(vectorToOpp => {
+          // vertically
+          if (vectorToOpp.y === 0
+            && vectorToMove.y === 0
+            && vectorToOpp.x !== vectorToMove.x
+            && Math.sign(vectorToOpp.x) === Math.sign(vectorToMove.x)
+            && Math.abs(vectorToMove.x) > Math.abs(vectorToOpp.x)) {
+            return true;
+          }
+          // horizontally
+          if (vectorToOpp.x === 0
+            && vectorToMove.x === 0
+            && vectorToOpp.y !== vectorToMove.y
+            && Math.sign(vectorToOpp.y) === Math.sign(vectorToMove.y)
+            && Math.abs(vectorToMove.y) > Math.abs(vectorToOpp.y)) {
+            return true;
+          }
+          // diagonally
+          if (Math.abs(vectorToOpp.x) === Math.abs(vectorToOpp.y)
+            && Math.abs(vectorToMove.x) === Math.abs(vectorToMove.y)
+            && Math.sign(vectorToOpp.x) === Math.sign(vectorToMove.x)
+            && Math.sign(vectorToOpp.y) === Math.sign(vectorToMove.y)
+            && Math.abs(vectorToMove.x) > Math.abs(vectorToOpp.x)
+            && Math.abs(vectorToMove.y) > Math.abs(vectorToOpp.y)) {
+            return true;
+          }
+          // opponent too close
+          if (areCoordsEqual(vectorToOpp, vectorToMove)
+            && vectorToOpp.distance < actualPieceType) {
+            return true;
+          }
+          return false;
+        });
+        if (!standsInTheWayOrTooClose) {
+          return coords;
         }
-        // horizontally
-        if (vectorToOpp.x === 0
-          && vectorToMove.x === 0
-          && vectorToOpp.y !== vectorToMove.y
-          && Math.sign(vectorToOpp.y) === Math.sign(vectorToMove.y)
-          && Math.abs(vectorToMove.y) > Math.abs(vectorToOpp.y)) {
-          return true;
-        }
-        // diagonally
-        if (Math.abs(vectorToOpp.x) === Math.abs(vectorToOpp.y)
-          && Math.abs(vectorToMove.x) === Math.abs(vectorToMove.y)
-          && Math.sign(vectorToOpp.x) === Math.sign(vectorToMove.x)
-          && Math.sign(vectorToOpp.y) === Math.sign(vectorToMove.y)
-          && Math.abs(vectorToMove.x) > Math.abs(vectorToOpp.x)
-          && Math.abs(vectorToMove.y) > Math.abs(vectorToOpp.y)) {
-          return true;
-        }
-        return false;
       });
-      if (!standsInTheWay) {
-        return coords;
-      }
-    });
   } else {
     validMoves = [...possibleMoves];
   }
