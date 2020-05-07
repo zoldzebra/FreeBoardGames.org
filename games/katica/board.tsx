@@ -43,6 +43,7 @@ interface IBoardProps {
 
 interface IBoardState {
   selected: ICartesianCoords;
+  validMovesHighlight: IColorMap;
 }
 
 function roundCoords(coords: ICartesianCoords) {
@@ -52,6 +53,7 @@ function roundCoords(coords: ICartesianCoords) {
 export class Board extends React.Component<IBoardProps, {}> {
   state: IBoardState = {
     selected: null,
+    validMovesHighlight: {},
   };
 
   isInverted() {
@@ -66,7 +68,6 @@ export class Board extends React.Component<IBoardProps, {}> {
   _shouldDrag = (coords: ICartesianCoords) => {
     if (this.props.ctx.phase === 'Move') {
       const invertedCoords = applyInvertion(coords, this.isInverted());
-      // console.log('coords inverted', applyInvertion(coords, this.isInverted()))
       return this.props.G.board[toIndex(invertedCoords)].player === Number(this.props.ctx.currentPlayer);
     }
   };
@@ -101,7 +102,6 @@ export class Board extends React.Component<IBoardProps, {}> {
 
   _onDrop = async (coords: ICartesianCoords) => {
     if (this.state.selected) {
-      console.log('onDrop');
       this._move(applyInvertion(roundCoords(coords), this.isInverted()));
     }
   };
@@ -115,6 +115,7 @@ export class Board extends React.Component<IBoardProps, {}> {
     this.setState({
       ...this.state,
       selected: null,
+      validMovesHighlight: {},
     });
     // if (isAIGame(this.props.gameArgs) && this.props.ctx.currentPlayer === '1') {
     //   this.stepAI();
@@ -122,10 +123,10 @@ export class Board extends React.Component<IBoardProps, {}> {
   };
 
   _getHighlightedSquares() {
-    const { selected } = this.state;
+    const { selected, validMovesHighlight } = this.state;
     const result = {} as IColorMap;
 
-    if (selected !== null) {
+    if (selected !== null && !Object.keys(validMovesHighlight).length) {
       const { G, ctx } = this.props;
       const otherPlayer = ctx.currentPlayer === '0' ? 1 : 0;
       result[cartesianToAlgebraic(selected.x, selected.y, false)] = blue[200];
@@ -137,15 +138,11 @@ export class Board extends React.Component<IBoardProps, {}> {
           result[cartesianToAlgebraic(field.x, field.y, false)] = blue[300];
         }
       })
-      // this.state.validMoves
-      //   .filter(move => areCoordsEqual(this.state.selected, move.from))
-      //   .forEach(move => {
-      //     result[cartesianToAlgebraic(move.to.x, move.to.y, false)] = blue[500];
-      //   });
+      this.setState({
+        validMovesHighlight: { ...result },
+      })
     }
-    console.log('result length', Object.keys(result).length);
-
-    return result;
+    return validMovesHighlight;
   }
 
   _getStatus() {

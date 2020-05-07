@@ -92,7 +92,6 @@ const ALL_MOVES = [
     { x: -2, y: -2 },
     { x: -2, y: 2 },
 
-
     { x: 3, y: 0 },
     { x: 3, y: -3 },
     { x: 3, y: 3 },
@@ -191,10 +190,9 @@ export function getValidMoves(G: IG, ctx: any, moveFrom: ICoord) {
     })
     .filter(coords => (coords.x <= 5 && coords.x >= 0) && (coords.y <= 6 && coords.y >= 0))
     .filter(coords => board[toIndex(coords)].player !== Number(ctx.currentPlayer));
-  // check for jumping over opponent
   const otherPlayer = ctx.currentPlayer === '0' ? 1 : 0;
   const opponentFields = possibleMoves.filter(coords => board[toIndex(coords)].player === otherPlayer);
-  console.log('opponentFields', opponentFields);
+  // check for jumping over opponent
   let validMoves = [];
   if (opponentFields) {
     const vectorsToOpponents = opponentFields.map(opponent => {
@@ -203,38 +201,35 @@ export function getValidMoves(G: IG, ctx: any, moveFrom: ICoord) {
         y: opponent.y - moveFrom.y,
       };
     });
-    console.log('vectorsToOpponents', vectorsToOpponents);
     validMoves = possibleMoves.filter(coords => {
       const vectorToMove = {
         x: coords.x - moveFrom.x,
         y: coords.y - moveFrom.y
       };
       const standsInTheWay = vectorsToOpponents.some(vectorToOpp => {
+        // vertically
         if (vectorToOpp.y === 0
           && vectorToMove.y === 0
           && vectorToOpp.x !== vectorToMove.x
           && Math.sign(vectorToOpp.x) === Math.sign(vectorToMove.x)
           && Math.abs(vectorToMove.x) > Math.abs(vectorToOpp.x)) {
-          console.log('opponent on X, vector:', vectorToOpp);
-          console.log('shadowing move vector', vectorToMove);
           return true;
         }
+        // horizontally
         if (vectorToOpp.x === 0
           && vectorToMove.x === 0
           && vectorToOpp.y !== vectorToMove.y
           && Math.sign(vectorToOpp.y) === Math.sign(vectorToMove.y)
           && Math.abs(vectorToMove.y) > Math.abs(vectorToOpp.y)) {
-          console.log('opponent on y, vector:', vectorToOpp);
-          console.log('shadowing move vector', vectorToMove);
           return true;
         }
+        // diagonally
         if (Math.abs(vectorToOpp.x) === Math.abs(vectorToOpp.y)
           && Math.abs(vectorToMove.x) === Math.abs(vectorToMove.y)
           && Math.sign(vectorToOpp.x) === Math.sign(vectorToMove.x)
           && Math.sign(vectorToOpp.y) === Math.sign(vectorToMove.y)
           && Math.abs(vectorToMove.x) > Math.abs(vectorToOpp.x)
           && Math.abs(vectorToMove.y) > Math.abs(vectorToOpp.y)) {
-          console.log('diagonal shadow')
           return true;
         }
         return false;
@@ -246,13 +241,6 @@ export function getValidMoves(G: IG, ctx: any, moveFrom: ICoord) {
   } else {
     validMoves = [...possibleMoves];
   }
-
-  // console.log('possibleMoves.length', possibleMoves.length);
-  console.log('opponentFields.length', opponentFields.length);
-  console.log('validMoves', validMoves);
-
-  console.log('validMoves.length', validMoves.length);
-
   return validMoves;
 }
 
@@ -262,10 +250,8 @@ export function movePiece(G: IG, ctx: any, moveFrom: ICoord, moveTo: ICoord) {
 
   // check if chosen move is in validMoves
   if (!validMoves.find(dir => R.equals(dir, moveTo))) {
-    console.log('invalid move');
     return INVALID_MOVE;
   } else {
-    console.log('valid move');
     board[toIndex(moveTo)] = board[toIndex(moveFrom)];
     board[toIndex(moveFrom)] = EMPTY_FIELD;
     const newG = {
