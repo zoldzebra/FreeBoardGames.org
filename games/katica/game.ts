@@ -31,12 +31,6 @@ interface ICoord {
   y: number;
 }
 
-export interface IMove {
-  from: ICoord;
-  to: ICoord;
-  jumped: ICoord;
-}
-
 export const EMPTY_FIELD = {
   id: null,
   player: null,

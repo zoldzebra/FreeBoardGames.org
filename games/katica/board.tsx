@@ -203,7 +203,7 @@ export class Board extends React.Component<IBoardProps, {}> {
       return (
         <GameLayout
           gameOver={this._getGameOver()}
-          extraCardContent={this._getGameOverBoard()}
+          // extraCardContent={this._getGameOverBoard()}
           gameArgs={this.props.gameArgs}
         />
       );
