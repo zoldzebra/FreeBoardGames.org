@@ -108,6 +108,126 @@ const COLUMNS = 6;
 
 const initialBoard = Array(ROWS * COLUMNS).fill(EMPTY_FIELD);
 
+function getStartingPieces() {
+  const players = [0, 1];
+  const pieceTypes = [1, 2, 3];
+  const piecesPerPieceType = 3;
+  let id = 0;
+  const pieces: Piece[] = [];
+  players.forEach(player => {
+    pieceTypes.forEach(pieceType => {
+      for (let i = 0; i < piecesPerPieceType; i++) {
+        pieces.push({
+          id,
+          player,
+          pieceType,
+        });
+        id += 1;
+      };
+    });
+  });
+  console.log('pieces', pieces);
+  return pieces;
+}
+
+function shuffleArray(array) {
+  for (let i = array.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [array[i], array[j]] = [array[j], array[i]];
+  }
+  return array;
+}
+
+function createStartingOrder(startingPieces: Piece[]) {
+  // TODO generate 2 pieces arrays already...
+  const startingOrder: Piece[] = [];
+  const player0Pieces = [];
+  const player1Pieces = [];
+  startingPieces.forEach(piece => {
+    if (piece.player === 0) {
+      player0Pieces.push(piece);
+    } else {
+      player1Pieces.push(piece);
+    }
+  });
+  shuffleArray(player0Pieces);
+  shuffleArray(player1Pieces);
+  for (let i = 0; i < startingPieces.length; i++) {
+    if (i % 2 === 0) {
+      startingOrder.push(player0Pieces[Math.floor(i / 2)]);
+    } else {
+      startingOrder.push(player1Pieces[Math.floor(i / 2)]);
+    }
+  }
+  console.log(player0Pieces, player1Pieces);
+  console.log('startingOrder', startingOrder);
+  return startingOrder;
+}
+
+// to go around the table from top left -> top right -> bottom right -> bottom left.
+// 0,0 is bottom right
+function sortStartCoords(startCoords) {
+  const topRow = [];
+  const rightRow = []
+  const bottomRow = [];
+  const leftRow = [];
+  startCoords.forEach(coord => {
+    if (coord.x === 0) {
+      rightRow.push(coord);
+    } else if (coord.y === ROWS - 1) {
+      topRow.push(coord);
+    } else if (coord.x === COLUMNS - 1) {
+      leftRow.push(coord)
+    } else if (coord.y === 0) {
+      bottomRow.push(coord)
+    }
+  })
+  const sortedCoords = topRow.reverse()
+    .concat(rightRow.reverse())
+    .concat(bottomRow)
+    .concat(leftRow);
+  console.log('topRow, rightRow, bottomRow, leftRow', topRow, rightRow, bottomRow, leftRow);
+  console.log('sortedCoords', sortedCoords);
+  return sortedCoords;
+}
+
+function createBasicStartBoard(board) {
+  const boardMatrix: Piece[][] = Array(COLUMNS).fill(null).map(() => Array(ROWS).fill(null));
+  board.forEach((cell, index) => {
+    const coords = toCoord(index);
+    boardMatrix[coords.x][coords.y] = cell;
+  });
+  console.log('boardMatrix', boardMatrix);
+  const piecesOrder = createStartingOrder(getStartingPieces());
+  const startCoords = [];
+  for (let col = 0; col < COLUMNS; col++) {
+    for (let row = 0; row < ROWS; row++) {
+      if ((col === 0 || row === 0 || col === COLUMNS - 1 || row === ROWS - 1)
+        && !(col === 0 && row === 0)
+        && !(col === 0 && row === ROWS - 1)
+        && !(col === COLUMNS - 1 && row === 0)
+        && !(col === COLUMNS - 1 && row === ROWS - 1)) {
+        startCoords.push({
+          x: col,
+          y: row,
+        })
+      }
+    }
+  }
+  console.log('startCoords', startCoords);
+  const sortedCoords = sortStartCoords(startCoords);
+  sortedCoords.forEach((startingCoord, index) => {
+    boardMatrix[startingCoord.x][startingCoord.y] = piecesOrder[index];
+  })
+
+  const startingBoard = [];
+  boardMatrix.forEach((col, colIndex) => {
+    col.forEach((rowCell, rowIndex) => startingBoard[toIndex({ x: colIndex, y: rowIndex })] = rowCell);
+  })
+  // G.piecesPlaced = piecesOrder.length;
+  return startingBoard;
+}
+
 function findGroup(matrixCopy: number[][], col: number, row: number, player: number) {
   if (matrixCopy[col][row] !== player) {
     return 0;
@@ -138,7 +258,6 @@ function getMatchResult(G: IG) {
     const coords = toCoord(index);
     boardMatrix[coords.x][coords.y] = cell.player;
   });
-
   const matrixCopy = R.clone(boardMatrix);
   const players = [0, 1];
   const result = {
@@ -177,36 +296,6 @@ function getMatchResult(G: IG) {
     }
   }
   return null;
-}
-
-export function isVictory(cells: number[]) {
-
-  const positions = [
-    // [0, 1, 2],
-    // [3, 4, 5],
-    // [6, 7, 8],
-    // [0, 3, 6],
-    // [1, 4, 7],
-    // [2, 5, 8],
-    // [0, 4, 8],
-    // [2, 4, 6],
-  ];
-
-  for (const pos of positions) {
-    const symbol = cells[pos[0]];
-    let winner = symbol;
-    for (const i of pos) {
-      if (cells[i] !== symbol) {
-        winner = null;
-        break;
-      }
-    }
-    if (winner != null) {
-      return true;
-    }
-  }
-
-  return false;
 }
 
 export function toIndex(coord: ICoord) {
@@ -347,8 +436,8 @@ export const KaticaGame = Game({
   name: 'katica',
 
   setup: (): IG => ({
-    board: initialBoard,
-    piecesPlaced: 0,
+    board: createBasicStartBoard(initialBoard),
+    piecesPlaced: 18,
   }),
 
   moves: {
@@ -359,12 +448,12 @@ export const KaticaGame = Game({
 
   flow: {
     movesPerTurn: 1,
-    startingPhase: Phase.Place,
+    startingPhase: Phase.Move,
     phases: {
       Place: {
         allowedMoves: ['placePiece'],
         next: Phase.Move,
-        endPhaseIf: (G: IG) => G.piecesPlaced === 6,
+        endPhaseIf: (G: IG) => G.piecesPlaced >= 18,
       },
       Move: {
         allowedMoves: ['movePiece'],
