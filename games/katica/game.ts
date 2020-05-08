@@ -109,7 +109,7 @@ const COLUMNS = 6;
 const initialBoard = Array(ROWS * COLUMNS).fill(EMPTY_FIELD);
 
 function checkForConnectedAreas(matrixCopy: number[][], col: number, row: number) {
-  if (matrixCopy[col][row] === null) {
+  if (matrixCopy[col][row] !== 1) {
     return 0;
   }
   matrixCopy[col][row] = null;
@@ -122,27 +122,14 @@ function checkForConnectedAreas(matrixCopy: number[][], col: number, row: number
   ];
 
   directions.forEach(dir => {
-    if (col + dir[0] < matrixCopy.length && row + dir[1] < matrixCopy[0].length) {
+    if (col + dir[0] < matrixCopy.length
+      && col + dir[0] >= 0
+      && row + dir[1] < matrixCopy[0].length
+      && row + dir[1] >= 0) {
+      console.log('try check c, r', col + dir[0], row + dir[1]);
       size += checkForConnectedAreas(matrixCopy, col + dir[0], row + dir[1]);
     }
   });
-
-  // for (
-  //   let r = row - 1 < 0 ? row : row - 1;
-  //   row + 1 >= matrixCopy[0].length ? r <= row : r <= row + 1;
-  //   r++
-  // ) {
-  //   for (
-  //     let c = col - 1 < 0 ? col : col - 1;
-  //     col + 1 >= matrixCopy.length ? c < col : c <= col + 1;
-  //     c++
-  //   ) {
-  //     if (r !== row || c !== col) {
-  //       console.log('new loop for', matrixCopy[c][r], c, r);
-  //       size += checkForConnectedAreas(matrixCopy, c, r);
-  //     }
-  //   }
-  // }
   return size;
 }
 
