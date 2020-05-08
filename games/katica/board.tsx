@@ -192,7 +192,7 @@ export class Board extends React.Component<IBoardProps, {}> {
         case '0':
           return 'red won';
         case '1':
-          return 'green won';
+          return 'orange won';
         case undefined:
           return 'draw';
       }

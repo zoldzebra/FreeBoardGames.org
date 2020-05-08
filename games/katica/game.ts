@@ -108,8 +108,8 @@ const COLUMNS = 6;
 
 const initialBoard = Array(ROWS * COLUMNS).fill(EMPTY_FIELD);
 
-function checkForConnectedAreas(matrixCopy: number[][], col: number, row: number) {
-  if (matrixCopy[col][row] !== 1) {
+function findGroup(matrixCopy: number[][], col: number, row: number, player: number) {
+  if (matrixCopy[col][row] !== player) {
     return 0;
   }
   matrixCopy[col][row] = null;
@@ -126,8 +126,7 @@ function checkForConnectedAreas(matrixCopy: number[][], col: number, row: number
       && col + dir[0] >= 0
       && row + dir[1] < matrixCopy[0].length
       && row + dir[1] >= 0) {
-      console.log('try check c, r', col + dir[0], row + dir[1]);
-      size += checkForConnectedAreas(matrixCopy, col + dir[0], row + dir[1]);
+      size += findGroup(matrixCopy, col + dir[0], row + dir[1], player);
     }
   });
   return size;
@@ -135,32 +134,48 @@ function checkForConnectedAreas(matrixCopy: number[][], col: number, row: number
 
 function getMatchResult(G: IG) {
   const boardMatrix: number[][] = Array(COLUMNS).fill(null).map(() => Array(ROWS).fill(null));
-
   G.board.forEach((cell, index) => {
     const coords = toCoord(index);
     boardMatrix[coords.x][coords.y] = cell.player;
   });
 
-  console.log('boardMatrix init', boardMatrix);
-
   const matrixCopy = R.clone(boardMatrix);
+  const players = [0, 1];
+  const result = {
+    0: [],
+    1: [],
+  };
 
   let size = 0;
 
   for (let col = 0; col < COLUMNS; col++) {
     for (let row = 0; row < ROWS; row++) {
-      if (matrixCopy[col][row] === 1) {
-        // console.log('boardMatrix', boardMatrix);
-        console.log('init checking at', col, row);
-        size = checkForConnectedAreas(matrixCopy, col, row);
-        if (size > 0) {
-          console.log('Found group w size', size);
+      players.forEach(player => {
+        if (matrixCopy[col][row] === player) {
+          size = findGroup(matrixCopy, col, row, player);
+          if (size > 0) {
+            result[player].push(size);
+          };
         };
+      })
+    }
+  }
+  // TODO refactor this part, its ugly
+  if (result[0].length === 1 || result[1].length === 1) {
+    if (result[0].length === 1 && result[1].length !== 1) {
+      return {
+        winner: '0'
+      };
+    } else if (result[1].length === 1 && result[0].length !== 1) {
+      return {
+        winner: '1'
+      };
+    } else if (result[1].length === 1 && result[0].length === 1) {
+      return {
+        draw: true
       };
     }
   }
-  console.log('matrixCopy after changes', matrixCopy);
-
   return null;
 }
 
@@ -315,7 +330,6 @@ export function movePiece(G: IG, ctx: any, moveFrom: ICoord, moveTo: ICoord) {
   const validMoves = getValidMoves(G, ctx, moveFrom);
   const board = [...G.board];
 
-  // check if chosen move is in validMoves
   if (!validMoves.find(dir => R.equals(dir, moveTo))) {
     return INVALID_MOVE;
   } else {
@@ -358,13 +372,12 @@ export const KaticaGame = Game({
     },
 
     endGameIf: (G, ctx) => {
-      // if (isVictory(G.cells)) {
-      //   return { winner: ctx.currentPlayer };
-      // }
-      getMatchResult(G);
-      // if (G.cells.filter((c: any) => c === null).length === 0) {
-      //   return { draw: true };
-      // }
+      if (ctx.turn > 5) {
+        const result = getMatchResult(G);
+        if (result) {
+          return result;
+        }
+      }
     },
   },
 });
