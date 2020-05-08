@@ -126,7 +126,6 @@ function getStartingPieces() {
       };
     });
   });
-  console.log('pieces', pieces);
   return pieces;
 }
 
@@ -159,8 +158,6 @@ function createStartingOrder(startingPieces: Piece[]) {
       startingOrder.push(player1Pieces[Math.floor(i / 2)]);
     }
   }
-  console.log(player0Pieces, player1Pieces);
-  console.log('startingOrder', startingOrder);
   return startingOrder;
 }
 
@@ -186,8 +183,6 @@ function sortStartCoords(startCoords) {
     .concat(rightRow.reverse())
     .concat(bottomRow)
     .concat(leftRow);
-  console.log('topRow, rightRow, bottomRow, leftRow', topRow, rightRow, bottomRow, leftRow);
-  console.log('sortedCoords', sortedCoords);
   return sortedCoords;
 }
 
@@ -197,7 +192,6 @@ function createBasicStartBoard(board) {
     const coords = toCoord(index);
     boardMatrix[coords.x][coords.y] = cell;
   });
-  console.log('boardMatrix', boardMatrix);
   const piecesOrder = createStartingOrder(getStartingPieces());
   const startCoords = [];
   for (let col = 0; col < COLUMNS; col++) {
@@ -214,7 +208,6 @@ function createBasicStartBoard(board) {
       }
     }
   }
-  console.log('startCoords', startCoords);
   const sortedCoords = sortStartCoords(startCoords);
   sortedCoords.forEach((startingCoord, index) => {
     boardMatrix[startingCoord.x][startingCoord.y] = piecesOrder[index];
@@ -224,15 +217,14 @@ function createBasicStartBoard(board) {
   boardMatrix.forEach((col, colIndex) => {
     col.forEach((rowCell, rowIndex) => startingBoard[toIndex({ x: colIndex, y: rowIndex })] = rowCell);
   })
-  // G.piecesPlaced = piecesOrder.length;
   return startingBoard;
 }
 
-function findGroup(matrixCopy: number[][], col: number, row: number, player: number) {
-  if (matrixCopy[col][row] !== player) {
+function findGroup(boardMatrix: number[][], col: number, row: number, player: number) {
+  if (boardMatrix[col][row] !== player) {
     return 0;
   }
-  matrixCopy[col][row] = null;
+  boardMatrix[col][row] = null;
   let size = 1;
   const directions = [
     [0, 1],
@@ -242,11 +234,11 @@ function findGroup(matrixCopy: number[][], col: number, row: number, player: num
   ];
 
   directions.forEach(dir => {
-    if (col + dir[0] < matrixCopy.length
+    if (col + dir[0] < boardMatrix.length
       && col + dir[0] >= 0
-      && row + dir[1] < matrixCopy[0].length
+      && row + dir[1] < boardMatrix[0].length
       && row + dir[1] >= 0) {
-      size += findGroup(matrixCopy, col + dir[0], row + dir[1], player);
+      size += findGroup(boardMatrix, col + dir[0], row + dir[1], player);
     }
   });
   return size;
@@ -258,7 +250,6 @@ function getMatchResult(G: IG) {
     const coords = toCoord(index);
     boardMatrix[coords.x][coords.y] = cell.player;
   });
-  const matrixCopy = R.clone(boardMatrix);
   const players = [0, 1];
   const result = {
     0: [],
@@ -270,8 +261,8 @@ function getMatchResult(G: IG) {
   for (let col = 0; col < COLUMNS; col++) {
     for (let row = 0; row < ROWS; row++) {
       players.forEach(player => {
-        if (matrixCopy[col][row] === player) {
-          size = findGroup(matrixCopy, col, row, player);
+        if (boardMatrix[col][row] === player) {
+          size = findGroup(boardMatrix, col, row, player);
           if (size > 0) {
             result[player].push(size);
           };
@@ -445,9 +436,9 @@ export const KaticaGame = Game({
     movePiece,
   },
 
-
   flow: {
     movesPerTurn: 1,
+    // use Place here if advantage activated
     startingPhase: Phase.Move,
     phases: {
       Place: {
