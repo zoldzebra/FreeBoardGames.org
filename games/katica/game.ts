@@ -140,8 +140,8 @@ function shuffleArray(array) {
 function createStartingOrder(startingPieces: Piece[]) {
   // TODO generate 2 pieces arrays already...
   const startingOrder: Piece[] = [];
-  const player0Pieces = [];
-  const player1Pieces = [];
+  const player0Pieces: Piece[] = [];
+  const player1Pieces: Piece[] = [];
   startingPieces.forEach(piece => {
     if (piece.player === 0) {
       player0Pieces.push(piece);
@@ -149,8 +149,7 @@ function createStartingOrder(startingPieces: Piece[]) {
       player1Pieces.push(piece);
     }
   });
-  shuffleArray(player0Pieces);
-  shuffleArray(player1Pieces);
+  [player0Pieces, player1Pieces].forEach(pieces => shuffleArray(pieces));
   for (let i = 0; i < startingPieces.length; i++) {
     if (i % 2 === 0) {
       startingOrder.push(player0Pieces[Math.floor(i / 2)]);
@@ -163,11 +162,11 @@ function createStartingOrder(startingPieces: Piece[]) {
 
 // to go around the table from top left -> top right -> bottom right -> bottom left.
 // 0,0 is bottom right
-function sortStartCoords(startCoords) {
-  const topRow = [];
-  const rightRow = []
-  const bottomRow = [];
-  const leftRow = [];
+function sortStartCoords(startCoords: ICoord[]) {
+  const topRow: ICoord[] = [];
+  const rightRow: ICoord[] = []
+  const bottomRow: ICoord[] = [];
+  const leftRow: ICoord[] = [];
   startCoords.forEach(coord => {
     if (coord.x === 0) {
       rightRow.push(coord);
@@ -192,8 +191,9 @@ function createBasicStartBoard(board) {
     const coords = toCoord(index);
     boardMatrix[coords.x][coords.y] = cell;
   });
-  const piecesOrder = createStartingOrder(getStartingPieces());
-  const startCoords = [];
+  const piecesInStartingOrder = createStartingOrder(getStartingPieces());
+  const startCoords: ICoord[] = [];
+  // get table edge coords
   for (let col = 0; col < COLUMNS; col++) {
     for (let row = 0; row < ROWS; row++) {
       if ((col === 0 || row === 0 || col === COLUMNS - 1 || row === ROWS - 1)
@@ -210,10 +210,10 @@ function createBasicStartBoard(board) {
   }
   const sortedCoords = sortStartCoords(startCoords);
   sortedCoords.forEach((startingCoord, index) => {
-    boardMatrix[startingCoord.x][startingCoord.y] = piecesOrder[index];
+    boardMatrix[startingCoord.x][startingCoord.y] = piecesInStartingOrder[index];
   })
 
-  const startingBoard = [];
+  const startingBoard: Piece[] = [];
   boardMatrix.forEach((col, colIndex) => {
     col.forEach((rowCell, rowIndex) => startingBoard[toIndex({ x: colIndex, y: rowIndex })] = rowCell);
   })
@@ -255,7 +255,6 @@ function getMatchResult(G: IG) {
     0: [],
     1: [],
   };
-
   let size = 0;
 
   for (let col = 0; col < COLUMNS; col++) {

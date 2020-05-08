@@ -17,9 +17,8 @@ import orange from '@material-ui/core/colors/orange';
 
 import { IGameArgs } from 'components/App/Game/GameBoardWrapper';
 import { GameLayout } from 'components/App/Game/GameLayout';
-import { Circle, Cross, Field, Lines } from './Shapes';
 import { isOnlineGame, isAIGame } from '../common/gameMode';
-import { IG, Piece, EMPTY_FIELD, toCoord, toIndex, IMove, areCoordsEqual, getValidMoves } from './game';
+import { IG, Piece, EMPTY_FIELD, toCoord, toIndex, getValidMoves } from './game';
 import { Token } from '@freeboardgame.org/boardgame.io/ui';
 import {
   Checkerboard,
