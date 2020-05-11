@@ -72,8 +72,8 @@ export class Board extends React.Component<IBoardProps, {}> {
   };
 
   _onClick = (coords: IAlgebraicCoords) => {
-    const position = algebraicToCartesian(coords.square);
     if (this.props.ctx.phase === 'Place') {
+      const position = algebraicToCartesian(coords.square);
       const boardIndex = toIndex(position);
       if (this.shouldPlace(position)) {
         this.props.moves.placePiece(boardIndex);
