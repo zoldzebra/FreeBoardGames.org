@@ -13,12 +13,12 @@ const VERSION = process.env.GIT_REV || getGitHash();
 
 function getGitHash() {
   let hash = 'unknown';
-  try {
-    hash = childProcess
-      .execSync('git rev-parse --short HEAD')
-      .toString()
-      .trim();
-  } catch (e) {}
+  // try {
+  //   hash = childProcess
+  //     .execSync('git rev-parse --short HEAD')
+  //     .toString()
+  //     .trim();
+  // } catch (e) {}
   return hash;
 }
 
