@@ -10,7 +10,7 @@ const APP_DIR = join(__dirname) + '/';
 const STATIC_DIR = APP_DIR + 'static/';
 
 const PORT = process.env.SERVER_PORT || process.env.PORT || 3000;
-const LOCAL_ADDRESS = process.env.LOCAL_ADDRESS || '127.0.0.1';
+const LOCAL_ADDRESS = process.env.LOCAL_ADDRESS || '0.0.0.0';
 const isProdChannel = process.env.CHANNEL === 'production';
 const app = next({ dev });
 const handle = app.getRequestHandler();
