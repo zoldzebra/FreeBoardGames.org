@@ -9,7 +9,8 @@ const BABEL_ENV_IS_PROD = (process.env.BABEL_ENV || 'production') === 'productio
 const APP_DIR = join(__dirname) + '/';
 const STATIC_DIR = APP_DIR + 'static/';
 
-const PORT = process.env.SERVER_PORT || 3000;
+const PORT = process.env.SERVER_PORT || process.env.PORT || 3000;
+const LOCAL_ADDRESS = process.env.LOCAL_ADDRESS || '127.0.0.1';
 const isProdChannel = process.env.CHANNEL === 'production';
 const app = next({ dev });
 const handle = app.getRequestHandler();
@@ -96,12 +97,12 @@ app
       return handle(req, res);
     });
 
-    server.listen(PORT, err => {
+    server.listen(PORT, LOCAL_ADDRESS, err => {
       if (err) {
         throw err;
       }
 
-      console.log(`Listening on http://0.0.0.0:${PORT}`);
+      console.log(`Listening on ${LOCAL_ADDRESS}:${PORT}`);
     });
   })
   .catch(e => {
