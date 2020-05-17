@@ -2,6 +2,10 @@
   "name": "FreeBoardGame.org",
   "version": "2.0.0",
   "license": "BSD-3-Clause",
+  "engines": {
+    "node": "10.16.0",
+    "npm": "6.9.0"
+  },
   "scripts": {
     "lint": "eslint --max-warnings=0 --ext .ts,.tsx pages src/ @types/ components/ tests/",
     "pre": "run-s lint format:check build:bgio test:coverage test:cypress report:combined",
