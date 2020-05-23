@@ -245,7 +245,7 @@ function getMatchResult(G: IG) {
     boardMatrix[coords.x][coords.y] = cell.player;
   });
   const players = [0, 1];
-  const result = {
+  const groups = {
     0: [],
     1: [],
   };
@@ -257,23 +257,23 @@ function getMatchResult(G: IG) {
         if (boardMatrix[col][row] === player) {
           size = findGroup(boardMatrix, col, row, player);
           if (size > 0) {
-            result[player].push(size);
+            groups[player].push(size);
           };
         };
       })
     }
   }
   // TODO refactor this part, its ugly
-  if (result[0].length === 1 || result[1].length === 1) {
-    if (result[0].length === 1 && result[1].length !== 1) {
+  if (groups[0].length === 1 || groups[1].length === 1) {
+    if (groups[0].length === 1 && groups[1].length !== 1) {
       return {
         winner: '0'
       };
-    } else if (result[1].length === 1 && result[0].length !== 1) {
+    } else if (groups[1].length === 1 && groups[0].length !== 1) {
       return {
         winner: '1'
       };
-    } else if (result[1].length === 1 && result[0].length === 1) {
+    } else if (groups[1].length === 1 && groups[0].length === 1) {
       return {
         draw: true
       };

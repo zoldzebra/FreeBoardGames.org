@@ -65,7 +65,7 @@ export class Board extends React.Component<IBoardProps, {}> {
   }
 
   _shouldDrag = (coords: ICartesianCoords) => {
-    if (this.props.ctx.phase === 'Move') {
+    if (this.props.ctx.phase === 'Move' && !this.props.ctx.gameover) {
       const invertedCoords = applyInvertion(coords, this.isInverted());
       return this.props.G.board[toIndex(invertedCoords)].player === Number(this.props.ctx.currentPlayer);
     }
@@ -203,7 +203,7 @@ export class Board extends React.Component<IBoardProps, {}> {
       return (
         <GameLayout
           gameOver={this._getGameOver()}
-          // extraCardContent={this._getGameOverBoard()}
+          extraCardContent={this._getGameOverBoard()}
           gameArgs={this.props.gameArgs}
         />
       );
@@ -286,7 +286,15 @@ export class Board extends React.Component<IBoardProps, {}> {
   _getGameOverBoard() {
     return (
       <div style={{ textAlign: 'center' }}>
-        GAME OVER
+        <Checkerboard
+          onClick={this._onClick}
+          invert={true}
+          highlightedSquares={this._getHighlightedSquares()}
+          primaryColor={green[900]}
+          secondaryColor={green[600]}
+        >
+          {this.getPieces()}
+        </Checkerboard>
       </div>
     );
   }
