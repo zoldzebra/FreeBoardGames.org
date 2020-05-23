@@ -11,7 +11,7 @@
     "pre": "run-s lint format:check build:bgio test:coverage test:cypress report:combined",
     "autopre": "run-s format:staged lint build:bgio test:coverage test:cypress report:combined",
     "dev": "node server.js",
-    "bgio:dev": "nodemon -e js,ts --exec yarn run bgio",
+    "bgio:dev": "nodemon -e js,ts --exec npm run bgio",
     "prod": "run-s build start",
     "build:bgio": "webpack --color --progress --config webpack.bgio.config.js",
     "bgio": "run-s build:bgio start:bgio",
@@ -87,6 +87,7 @@
     "worker-loader": "^2.0.0"
   },
   "devDependencies": {
+    "@babel/compat-data": "7.8.0",
     "@cypress/code-coverage": "^1.10.4",
     "@testing-library/jest-dom": "^5.0.2",
     "@testing-library/react": "^9.4.0",
