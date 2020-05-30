@@ -1,1 +1,1 @@
-web: npm run start && npm run bgio
+web: npm run start
