@@ -3,7 +3,8 @@ import noCache from 'koa-no-cache';
 const cors = require('@koa/cors'); // tslint:disable-line
 const { Server } = require('@freeboardgame.org/boardgame.io/server'); // tslint:disable-line
 
-const PORT = process.env.SERVER_PORT || process.env.BGIO_PORT || 8001;
+const PORT = process.env.PORT || process.env.BGIO_PORT || 8001;
+const LOCAL_ADDRESS = process.env.LOCAL_ADDRESS || '0.0.0.0';
 
 const startServer = async () => {
   const configs = Promise.all(GAMES_LIST.map(gameDef => gameDef.config()));
@@ -12,7 +13,7 @@ const startServer = async () => {
   server.app.use(noCache({ global: true }));
   server.app.use(cors());
   server.run(PORT, () => {
-    console.log(`Serving boardgame.io at: http://0.0.0.0:${PORT}/`); // tslint:disable-line
+    console.log(`Serving boardgame.io KATICABACKEND at: http://${LOCAL_ADDRESS}:${PORT}/`); // tslint:disable-line
   });
 };
 
