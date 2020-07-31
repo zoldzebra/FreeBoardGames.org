@@ -15,6 +15,7 @@ class defaultApp extends App {
     ReactGA.pageview(path);
   }
 
+
   componentDidMount() {
     // Remove the server-side injected CSS:
     const jssStyles = document.querySelector('#jss-server-side');
@@ -36,6 +37,7 @@ class defaultApp extends App {
   }
   render() {
     const { Component, pageProps } = this.props;
+    console.log({ pageProps, Component });
     return (
       <ThemeProvider theme={theme}>
         <SelfXSSWarning />

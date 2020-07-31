@@ -3,7 +3,6 @@ import FreeBoardGamesBar from 'components/App/FreeBoardGamesBar';
 import Header from 'components/Header';
 import { GamesList } from 'components/App/GamesList';
 import SEO from 'components/SEO';
-import Link from 'next/link';
 
 class Home extends React.Component<{}, {}> {
   render() {
@@ -16,12 +15,7 @@ class Home extends React.Component<{}, {}> {
           }
         />
         <Header />
-        <Link href={`/main`}>
-          <a style={{ textDecoration: 'none' }}>
-            LOGIN
-          </a>
-        </Link>
-        {/* <GamesList /> */}
+        <GamesList />
       </FreeBoardGamesBar>
     );
   }
