@@ -10,6 +10,11 @@ const CHANNEL = process.env.CHANNEL || 'development';
 const BGIO_SERVER_URL = process.env.BGIO_SERVER_URL;
 const BABEL_ENV_IS_PROD = (process.env.BABEL_ENV || 'production') === 'production';
 const VERSION = process.env.GIT_REV || getGitHash();
+const FIREBASE_CLIENT_EMAIL = process.env.FIREBASE_CLIENT_EMAIL || 'firebase-adminsdk-e90q2@katica0.iam.gserviceaccount.com';
+const NEXT_PUBLIC_FIREBASE_PUBLIC_API_KEY = process.env.NEXT_PUBLIC_FIREBASE_PUBLIC_API_KEY || 'AIzaSyBVZfdFMLJqN_hDblG_-uWVOChBHllXk0g';
+const NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN = process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN || 'katica0.firebaseapp.com';
+const NEXT_PUBLIC_FIREBASE_DATABASE_URL = process.env.NEXT_PUBLIC_FIREBASE_DATABASE_URL || 'https://katica0.firebaseio.com';
+const NEXT_PUBLIC_FIREBASE_PROJECT_ID = process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID || 'katica0';
 
 function getGitHash() {
   let hash = 'unknown';
@@ -52,6 +57,11 @@ module.exports = withWorkers(
           BGIO_SERVER_URL,
           BABEL_ENV_IS_PROD,
           GA_TRACKING_CODE: process.env.GA_TRACKING_CODE,
+          FIREBASE_CLIENT_EMAIL,
+          NEXT_PUBLIC_FIREBASE_PUBLIC_API_KEY,
+          NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN,
+          NEXT_PUBLIC_FIREBASE_DATABASE_URL,
+          NEXT_PUBLIC_FIREBASE_PROJECT_ID,
         },
         webpack: config => {
           config.module.rules.push({
