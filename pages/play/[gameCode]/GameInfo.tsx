@@ -7,6 +7,7 @@ import { IGameDef, GAMES_MAP } from 'games';
 import { withRouter } from 'next/router';
 import { generatePageError } from 'next-with-error';
 import SEO from 'components/SEO';
+import { AuthUserContext } from '../../../components/Session';
 
 interface gameInfoProps {
   gameDef: IGameDef;
@@ -16,12 +17,18 @@ class GameInfo extends React.Component<gameInfoProps, {}> {
   render() {
     const gameDef = this.props.gameDef;
     return (
-      <FreeBoardGamesBar>
-        <SEO title={`Play ${gameDef.name}, ${gameDef.description}`} description={gameDef.descriptionTag} />
-        <GameCard game={gameDef} />
-        <GameModePicker gameDef={gameDef} />
-        <GameInstructions gameDef={gameDef} />
-      </FreeBoardGamesBar>
+      <AuthUserContext.Consumer>
+        {authUser =>
+          authUser
+            ? <FreeBoardGamesBar>
+              <SEO title={`Play ${gameDef.name}, ${gameDef.description}`} description={gameDef.descriptionTag} />
+              <GameCard game={gameDef} />
+              <GameModePicker gameDef={gameDef} />
+              <GameInstructions gameDef={gameDef} />
+            </FreeBoardGamesBar>
+            : null
+        }
+      </AuthUserContext.Consumer>
     );
   }
   static async getInitialProps(router) {

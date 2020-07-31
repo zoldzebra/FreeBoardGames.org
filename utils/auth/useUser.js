@@ -5,11 +5,11 @@ import firebase from 'firebase/app'
 import 'firebase/auth'
 import initFirebase from '../auth/initFirebase'
 
-initFirebase()
+initFirebase();
 
 const useUser = () => {
-  const [user, setUser] = useState()
-  const router = useRouter()
+  const [user, setUser] = useState();
+  const router = useRouter();
 
   const logout = async () => {
     return firebase

@@ -6,6 +6,7 @@ import SEO from 'components/SEO';
 import Link from 'next/link';
 import useSWR from 'swr';
 import { useUser } from '../utils/auth/useUser';
+import { AuthUserContext } from '../components/Session';
 
 const fetcher = (url, token) =>
   fetch(url, {
@@ -17,10 +18,7 @@ const fetcher = (url, token) =>
 
 const Index = () => {
   const { user, logout } = useUser();
-  // const { data, error } = useSWR(
-  //   user ? ['/api/getFood', user.token] : null,
-  //   fetcher
-  // )
+
   if (!user) {
     return (
       <>
@@ -56,7 +54,11 @@ const Index = () => {
       >
         Log out
         </p>
-      <GamesList />
+      <AuthUserContext.Consumer>
+        {authUser =>
+          authUser ? <GamesList /> : null
+        }
+      </AuthUserContext.Consumer>
     </FreeBoardGamesBar>
   )
 }
