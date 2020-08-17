@@ -16,6 +16,7 @@ import { useUser } from '../utils/auth/useUser';
 
 function MyApp({ Component, pageProps }: AppProps) {
   const { user, logout } = useUser();
+  console.log('app ran');
 
   useEffect(() => {
     // Remove the server-side injected CSS:

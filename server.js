@@ -17,6 +17,10 @@ const handle = app.getRequestHandler();
 
 const excludedPaths = ['/_error', '/_document', '/_app'];
 
+console.log(process.env.NODE_ENV);
+
+console.log({app});
+
 function isExcludedPath(path) {
   if (path.includes('[')) {
     return true;

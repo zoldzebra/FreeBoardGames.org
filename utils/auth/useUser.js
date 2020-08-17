@@ -33,7 +33,6 @@ const useUser = () => {
       return
     }
     setUser(JSON.parse(cookie))
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   return { user, logout }

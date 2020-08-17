@@ -10,7 +10,7 @@ import { ListPlayers } from '../../../../components/App/Lobby/ListPlayers';
 import { GameCard } from '../../../../components/App/Game/GameCard';
 import { NicknamePrompt } from '../../../../components/App/Lobby/NicknamePrompt';
 import { useRouter, NextRouter } from 'next/router';
-import { AuthUserContext } from '../../../../components/Session';
+import { AuthUserContext, GoToSignInPage } from '../../../../components/Session';
 
 interface IRoomProps {
   gameCode: string;
@@ -74,7 +74,7 @@ class Room extends React.Component<IRoomProps, IRoomState> {
               {this._getGameSharing()}
               <ListPlayers roomMetadata={this.state.roomMetadata} editNickname={this._toggleEditingName} />
             </FreeBoardGamesBar>
-            : null
+            : <GoToSignInPage />
         }
       </AuthUserContext.Consumer>
     );

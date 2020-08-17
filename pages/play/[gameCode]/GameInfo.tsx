@@ -7,7 +7,7 @@ import { IGameDef, GAMES_MAP } from 'games';
 import { withRouter } from 'next/router';
 import { generatePageError } from 'next-with-error';
 import SEO from 'components/SEO';
-import { AuthUserContext } from '../../../components/Session';
+import { AuthUserContext, GoToSignInPage } from '../../../components/Session';
 
 interface gameInfoProps {
   gameDef: IGameDef;
@@ -26,7 +26,7 @@ class GameInfo extends React.Component<gameInfoProps, {}> {
               <GameModePicker gameDef={gameDef} />
               <GameInstructions gameDef={gameDef} />
             </FreeBoardGamesBar>
-            : null
+            : <GoToSignInPage />
         }
       </AuthUserContext.Consumer>
     );
