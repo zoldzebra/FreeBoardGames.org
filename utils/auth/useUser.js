@@ -10,14 +10,20 @@ initFirebase();
 const useUser = () => {
   const [user, setUser] = useState();
   const router = useRouter();
+  const firebaseDb = firebase.database();
 
   const logout = async () => {
+    console.log('logout user', user);
+    const uUid = user.id;
     return firebase
       .auth()
       .signOut()
       .then(() => {
         // Sign-out successful.
         cookies.remove('auth')
+        firebaseDb.ref('users/' + uUid).update({
+          online: false,
+        })
         setUser()
         router.push('/auth')
       })

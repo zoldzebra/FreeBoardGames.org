@@ -3,8 +3,9 @@ import FreeBoardGamesBar from 'components/App/FreeBoardGamesBar';
 import Header from 'components/Header';
 import { GamesList } from 'components/App/GamesList';
 import SEO from 'components/SEO';
-import { useUser } from '../utils/auth/useUser';
 import { AuthUserContext, GoToSignInPage } from '../components/Session';
+import { useUser } from '../utils/auth/useUser';
+import firebase from 'firebase/app';
 
 const fetcher = (url, token) =>
   fetch(url, {
@@ -15,11 +16,48 @@ const fetcher = (url, token) =>
 
 
 const Index = () => {
-  const { user, logout } = useUser();
+  const { logout } = useUser();
 
-  console.log('Index ran');
+  const fetchOnlineUsers = () => {
+    let onlineUsers = [];
+    const onDataCallback = (snapshot) => {
+      snapshot.forEach(snapshotData => {
+        const email = snapshotData.val().email;
+        onlineUsers.push(email);
+      })
+    };
+    const firebaseDb = firebase.database();
+    const usersRef = firebaseDb.ref('users');
+    usersRef
+      .orderByChild('online')
+      .equalTo(true)
+      .on(
+        'value',
+        onDataCallback
+      );
+    return onlineUsers;
+  }
+
+  // update has to put to useEffect or sthg like that
 
   const renderMainPage = (authUser) => {
+    const onlineUsers: string[] = fetchOnlineUsers();
+    console.log({ onlineUsers });
+
+    const renderOnlineUserMails = () => {
+      if (!onlineUsers.length) return null;
+      return (
+        <ul>
+          {onlineUsers.map(userMail => {
+            return (
+              <li key={userMail}>{`${userMail}`}</li>
+            )
+          })
+          }
+        </ul>
+      )
+    }
+
     return (
       <FreeBoardGamesBar FEATURE_FLAG_readyForDesktopView>
         <SEO
@@ -41,6 +79,8 @@ const Index = () => {
         >
           Log out
         </p>
+        <p>Online users:</p>
+        {renderOnlineUserMails()}
         <GamesList />
       </FreeBoardGamesBar>
     )

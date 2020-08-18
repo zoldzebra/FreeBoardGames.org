@@ -1,22 +1,41 @@
 /* eslint-disable react/react-in-jsx-scope */
 
-import { useEffect, useState } from 'react';
-import App from 'next/app';
+import { useEffect } from 'react';
 import { AppProps } from 'next/app';
 
 import { ThemeProvider } from '@material-ui/core/styles';
 import theme from '../src/theme';
 import { SelfXSSWarning } from 'components/App/SelfXSSWarning';
-import withError from 'next-with-error';
-import ErrorPage from './_error';
-import ReactGA from 'react-ga';
-import Router from 'next/router';
 import { AuthUserContext } from '../components/Session';
 import { useUser } from '../utils/auth/useUser';
+import firebase from 'firebase';
 
 function MyApp({ Component, pageProps }: AppProps) {
-  const { user, logout } = useUser();
-  console.log('app ran');
+  const { user } = useUser();
+
+  console.log({ user });
+
+  const firebaseDb = firebase.database();
+
+  const checkAuthStateChanged = () => {
+    firebase.auth().onAuthStateChanged(function (user) {
+      if (user) {
+        firebaseDb.ref('users/' + user.uid).set({
+          email: user.email,
+          online: true
+        })
+          .then(function () {
+            console.log('Synchronization succeeded');
+          })
+          .catch(function (error) {
+            console.log('Synchronization failed');
+          });
+      }
+      if (!user) {
+        console.log('User logged out, user:', user);
+      }
+    });
+  }
 
   useEffect(() => {
     // Remove the server-side injected CSS:
@@ -27,6 +46,9 @@ function MyApp({ Component, pageProps }: AppProps) {
   }, []);
 
   console.log({ pageProps, Component });
+
+  checkAuthStateChanged();
+
   return (
     <ThemeProvider theme={theme}>
       <AuthUserContext.Provider value={user}>
