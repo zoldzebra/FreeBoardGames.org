@@ -3,6 +3,7 @@ const express = require('express');
 const { join } = require('path');
 const fs = require('fs');
 const { parse } = require('url');
+require('dotenv').config();
 
 const dev = process.env.NODE_ENV !== 'production';
 const BABEL_ENV_IS_PROD = (process.env.BABEL_ENV || 'production') === 'production';
