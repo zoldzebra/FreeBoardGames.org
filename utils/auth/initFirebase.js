@@ -8,9 +8,6 @@ const config = {
   projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
 }
 
-console.log({config});
-
-
 export default function initFirebase() {
   if (!firebase.apps.length) {
     firebase.initializeApp(config)

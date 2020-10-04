@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import FreeBoardGamesBar from 'components/App/FreeBoardGamesBar';
 import Header from 'components/Header';
 import { GamesList } from 'components/App/GamesList';
@@ -17,31 +17,27 @@ const fetcher = (url, token) =>
 
 const Index = () => {
   const { logout } = useUser();
+  const [onlineUsers, setOnlineUsers] = useState([]);
+  const firebaseDb = firebase.database();
+  const usersRef = firebaseDb.ref('users');
 
-  const fetchOnlineUsers = () => {
-    let onlineUsers = [];
-    const onDataCallback = (snapshot) => {
-      snapshot.forEach(snapshotData => {
-        const email = snapshotData.val().email;
-        onlineUsers.push(email);
-      })
-    };
-    const firebaseDb = firebase.database();
-    const usersRef = firebaseDb.ref('users');
-    usersRef
+  useEffect(() => {
+    const listener = usersRef
       .orderByChild('online')
       .equalTo(true)
-      .on(
-        'value',
-        onDataCallback
-      );
-    return onlineUsers;
-  }
+      .on('value', snapshot => {
+        let foundOnlineUsers = [];
+        snapshot.forEach(childSnapshot => {
+          const email = childSnapshot.val().email;
+          foundOnlineUsers.push(email);
+        });
+        setOnlineUsers([...foundOnlineUsers]);
+      });
+    return () => usersRef.off('value', listener);
+  }, [firebaseDb]);
 
-  // update has to put to useEffect or sthg like that
 
   const renderMainPage = (authUser) => {
-    const onlineUsers: string[] = fetchOnlineUsers();
     console.log({ onlineUsers });
 
     const renderOnlineUserMails = () => {

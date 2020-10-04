@@ -13,11 +13,12 @@ import firebase from 'firebase';
 function MyApp({ Component, pageProps }: AppProps) {
   const { user } = useUser();
 
-  console.log({ user });
+  console.log('_app user:', user);
 
   const firebaseDb = firebase.database();
 
   const checkAuthStateChanged = () => {
+    console.log('checkAuthStateChanged ran');
     firebase.auth().onAuthStateChanged(function (user) {
       if (user) {
         firebaseDb.ref('users/' + user.uid).set({
@@ -45,7 +46,7 @@ function MyApp({ Component, pageProps }: AppProps) {
     }
   }, []);
 
-  console.log({ pageProps, Component });
+  // console.log({ pageProps, Component });
 
   checkAuthStateChanged();
 
