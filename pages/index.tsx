@@ -6,18 +6,16 @@ import SEO from 'components/SEO';
 import { AuthUserContext, GoToSignInPage } from '../components/Session';
 import { useUser } from '../utils/auth/useUser';
 import firebase from 'firebase/app';
+import { Button, Paper } from '@material-ui/core';
 
-const fetcher = (url, token) =>
-  fetch(url, {
-    method: 'GET',
-    headers: new Headers({ 'Content-Type': 'application/json', token }),
-    credentials: 'same-origin',
-  }).then((res) => res.json());
-
+interface User {
+  id: string,
+  email: string,
+}
 
 const Index = () => {
   const { logout } = useUser();
-  const [onlineUsers, setOnlineUsers] = useState([]);
+  const [onlineUsers, setOnlineUsers] = useState([] as User[]);
   const firebaseDb = firebase.database();
   const usersRef = firebaseDb.ref('users');
 
@@ -29,31 +27,41 @@ const Index = () => {
         let foundOnlineUsers = [];
         snapshot.forEach(childSnapshot => {
           const email = childSnapshot.val().email;
-          foundOnlineUsers.push(email);
+          foundOnlineUsers.push({
+            id: childSnapshot.key,
+            email
+          });
         });
         setOnlineUsers([...foundOnlineUsers]);
       });
     return () => usersRef.off('value', listener);
   }, [firebaseDb]);
 
+  const renderOnlineUserMails = (authUserId) => {
+    if (!onlineUsers.length) return null;
+    return onlineUsers
+      .filter(user => user.id !== authUserId)
+      .map(user => {
+        return onlinePlayerWithInvite(user);
+      })
+  }
+
+  const onlinePlayerWithInvite = (user: User) => {
+    return (
+      <Paper key={user.id}>
+        { user.email}
+        <Button
+          variant='contained'
+          color='primary'
+          onClick={() => console.log(`click on user id ${user.id}`)}
+        >
+          Invite!
+        </Button>
+      </Paper>
+    )
+  }
 
   const renderMainPage = (authUser) => {
-    console.log({ onlineUsers });
-
-    const renderOnlineUserMails = () => {
-      if (!onlineUsers.length) return null;
-      return (
-        <ul>
-          {onlineUsers.map(userMail => {
-            return (
-              <li key={userMail}>{`${userMail}`}</li>
-            )
-          })
-          }
-        </ul>
-      )
-    }
-
     return (
       <FreeBoardGamesBar FEATURE_FLAG_readyForDesktopView>
         <SEO
@@ -76,7 +84,7 @@ const Index = () => {
           Log out
         </p>
         <p>Online users:</p>
-        {renderOnlineUserMails()}
+        {renderOnlineUserMails(authUser.id)}
         <GamesList />
       </FreeBoardGamesBar>
     )
