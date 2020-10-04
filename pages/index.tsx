@@ -13,11 +13,19 @@ interface User {
   email: string,
 }
 
+interface Invitation {
+  invitationTo: string,
+  invitationFrom: string,
+  invitationTime: number,
+}
+
 const Index = () => {
   const { logout } = useUser();
   const [onlineUsers, setOnlineUsers] = useState([] as User[]);
+  const [invitations, setInvitations] = useState([] as Invitation[]);
   const firebaseDb = firebase.database();
   const usersRef = firebaseDb.ref('users');
+  const invtiationsRef = firebaseDb.ref('invitations');
 
   useEffect(() => {
     const listener = usersRef
@@ -37,23 +45,69 @@ const Index = () => {
     return () => usersRef.off('value', listener);
   }, [firebaseDb]);
 
+  useEffect(() => {
+    const listener = invtiationsRef
+      .orderByChild('invitationTime')
+      .on('value', snapshot => {
+        let activeInvitations = [];
+        snapshot.forEach(childSnapshot => {
+          const invitationTo = childSnapshot.val().invitationTo;
+          const invitationFrom = childSnapshot.val().invitationFrom;
+          activeInvitations.push({
+            id: childSnapshot.key,
+            invitationTo,
+            invitationFrom,
+          });
+        });
+        setInvitations([...activeInvitations]);
+      });
+    return () => usersRef.off('value', listener);
+  }, [firebaseDb]);
+
+  const inviteUser = (invitationTo: string, invitationFrom: string) => {
+    const newInvite = firebaseDb.ref('invitations/').push();
+    newInvite.set({
+      invitationTo,
+      invitationFrom,
+      invitationTime: Date.now(),
+    });
+  }
+
+  const renderInvitations = (authUserId) => {
+    if (!invitations.length) return null;
+    return invitations
+      .filter(invitation => invitation.invitationTo !== authUserId)
+      .map(invitation => {
+        return invitationItem(invitation.invitationFrom);
+      })
+  }
+
+  const invitationItem = (from: string) => {
+    return (
+      <Paper key={from}>
+        { from}
+      </Paper>
+    )
+  }
+
   const renderOnlineUserMails = (authUserId) => {
     if (!onlineUsers.length) return null;
     return onlineUsers
       .filter(user => user.id !== authUserId)
       .map(user => {
-        return onlinePlayerWithInvite(user);
+        return onlinePlayerWithInvite(user, authUserId);
       })
   }
 
-  const onlinePlayerWithInvite = (user: User) => {
+  const onlinePlayerWithInvite = (user: User, authUserId: string) => {
     return (
       <Paper key={user.id}>
         { user.email}
+        // TODO: should switch to Cancel invite! after pushed
         <Button
           variant='contained'
           color='primary'
-          onClick={() => console.log(`click on user id ${user.id}`)}
+          onClick={() => inviteUser(user.id, authUserId)}
         >
           Invite!
         </Button>
@@ -85,6 +139,8 @@ const Index = () => {
         </p>
         <p>Online users:</p>
         {renderOnlineUserMails(authUser.id)}
+        <p>Active invitations to you:</p>
+        {renderInvitations(authUser.id)}
         <GamesList />
       </FreeBoardGamesBar>
     )
