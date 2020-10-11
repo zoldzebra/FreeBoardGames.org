@@ -14,8 +14,9 @@ interface User {
 }
 
 interface Invitation {
-  invitationTo: string,
-  invitationFrom: string,
+  invitationToId: string,
+  invitationFromEmail: string,
+  invitationFromId: string,
   invitationTime: number,
 }
 
@@ -51,12 +52,14 @@ const Index = () => {
       .on('value', snapshot => {
         let activeInvitations = [];
         snapshot.forEach(childSnapshot => {
-          const invitationTo = childSnapshot.val().invitationTo;
-          const invitationFrom = childSnapshot.val().invitationFrom;
+          const invitationToId = childSnapshot.val().invitationToId;
+          const invitationFromEmail = childSnapshot.val().invitationFromEmail;
+          const invitationFromId = childSnapshot.val().invitationFromId;
           activeInvitations.push({
             id: childSnapshot.key,
-            invitationTo,
-            invitationFrom,
+            invitationToId,
+            invitationFromEmail,
+            invitationFromId,
           });
         });
         setInvitations([...activeInvitations]);
@@ -64,42 +67,58 @@ const Index = () => {
     return () => usersRef.off('value', listener);
   }, [firebaseDb]);
 
-  const inviteUser = (invitationTo: string, invitationFrom: string) => {
-    const newInvite = firebaseDb.ref('invitations/').push();
+  const inviteUser = (invitationToId: string, invitationFromEmail: string, invitationFromId: string) => {
+    // check if invitation exists already
+    let invitationExists = false;
+    invtiationsRef.once('value', invitations => {
+      invitations.forEach(invitation => {
+        if (invitationToId === invitation.val().invitationToId
+          && invitationFromId === invitation.val().invitationFromId) {
+          invitationExists = true;
+        }
+      })
+    });
+    if (invitationExists) {
+      console.log('Invitation already created!');
+      return;
+    }
+
+    const newInvite = invtiationsRef.push();
     newInvite.set({
-      invitationTo,
-      invitationFrom,
+      invitationToId,
+      invitationFromEmail,
+      invitationFromId,
       invitationTime: Date.now(),
     });
   }
 
-  const renderInvitations = (authUserId) => {
+  const renderReceivedInvitations = (authUserId) => {
     if (!invitations.length) return null;
     return invitations
-      .filter(invitation => invitation.invitationTo !== authUserId)
+      .filter(invitation => invitation.invitationToId === authUserId)
       .map(invitation => {
-        return invitationItem(invitation.invitationFrom);
+        return invitationItem(invitation.invitationFromId, invitation.invitationFromEmail);
       })
   }
 
-  const invitationItem = (from: string) => {
+  const invitationItem = (fromID: string, fromEmail: string) => {
     return (
-      <Paper key={from}>
-        { from}
+      <Paper key={fromID}>
+        { fromEmail}
       </Paper>
     )
   }
 
-  const renderOnlineUserMails = (authUserId) => {
+  const renderOnlineUserMails = (authUser) => {
     if (!onlineUsers.length) return null;
     return onlineUsers
-      .filter(user => user.id !== authUserId)
+      .filter(user => user.id !== authUser.id)
       .map(user => {
-        return onlinePlayerWithInvite(user, authUserId);
+        return onlinePlayerWithInvite(user, authUser.email, authUser.id);
       })
   }
 
-  const onlinePlayerWithInvite = (user: User, authUserId: string) => {
+  const onlinePlayerWithInvite = (user: User, authUserEmail: string, authUserId: string) => {
     return (
       <Paper key={user.id}>
         { user.email}
@@ -107,7 +126,7 @@ const Index = () => {
         <Button
           variant='contained'
           color='primary'
-          onClick={() => inviteUser(user.id, authUserId)}
+          onClick={() => inviteUser(user.id, authUserEmail, authUserId)}
         >
           Invite!
         </Button>
@@ -138,9 +157,9 @@ const Index = () => {
           Log out
         </p>
         <p>Online users:</p>
-        {renderOnlineUserMails(authUser.id)}
-        <p>Active invitations to you:</p>
-        {renderInvitations(authUser.id)}
+        {renderOnlineUserMails(authUser)}
+        <p>You have got invitations from:</p>
+        {renderReceivedInvitations(authUser.id)}
         <GamesList />
       </FreeBoardGamesBar>
     )
