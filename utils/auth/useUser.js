@@ -32,8 +32,9 @@ const useUser = () => {
       })
   }
 
+  // gets online user from browser auth
   useEffect(() => {
-    const cookie = cookies.get('auth')
+    const cookie = cookies.get('auth');
     if (!cookie) {
       router.push('/')
       return

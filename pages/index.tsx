@@ -21,7 +21,7 @@ interface Invitation {
 }
 
 const Index = () => {
-  const { logout } = useUser();
+  const { logout, user } = useUser();
   const [onlineUsers, setOnlineUsers] = useState([] as User[]);
   const [invitations, setInvitations] = useState([] as Invitation[]);
   const firebaseDb = firebase.database();
@@ -36,15 +36,17 @@ const Index = () => {
         let foundOnlineUsers = [];
         snapshot.forEach(childSnapshot => {
           const email = childSnapshot.val().email;
-          foundOnlineUsers.push({
-            id: childSnapshot.key,
-            email
-          });
+          if (user && user.id !== childSnapshot.key) {
+            foundOnlineUsers.push({
+              id: childSnapshot.key,
+              email,
+            });
+          }
         });
         setOnlineUsers([...foundOnlineUsers]);
       });
     return () => usersRef.off('value', listener);
-  }, [firebaseDb]);
+  }, [firebaseDb, user]);
 
   useEffect(() => {
     const listener = invtiationsRef
@@ -55,25 +57,27 @@ const Index = () => {
           const invitationToId = childSnapshot.val().invitationToId;
           const invitationFromEmail = childSnapshot.val().invitationFromEmail;
           const invitationFromId = childSnapshot.val().invitationFromId;
-          activeInvitations.push({
-            id: childSnapshot.key,
-            invitationToId,
-            invitationFromEmail,
-            invitationFromId,
-          });
+          if (user && user.id !== invitationToId) {
+            activeInvitations.push({
+              id: childSnapshot.key,
+              invitationToId,
+              invitationFromEmail,
+              invitationFromId,
+            });
+          }
         });
         setInvitations([...activeInvitations]);
       });
     return () => usersRef.off('value', listener);
-  }, [firebaseDb]);
+  }, [firebaseDb, user]);
 
-  const inviteUser = (invitationToId: string, invitationFromEmail: string, invitationFromId: string) => {
+  const inviteUser = (invitationToId: string) => {
     // check if invitation exists already
     let invitationExists = false;
     invtiationsRef.once('value', invitations => {
       invitations.forEach(invitation => {
         if (invitationToId === invitation.val().invitationToId
-          && invitationFromId === invitation.val().invitationFromId) {
+          && user.id === invitation.val().invitationFromId) {
           invitationExists = true;
         }
       })
@@ -86,16 +90,15 @@ const Index = () => {
     const newInvite = invtiationsRef.push();
     newInvite.set({
       invitationToId,
-      invitationFromEmail,
-      invitationFromId,
+      invitationFromEmail: user.email,
+      invitationFromId: user.id,
       invitationTime: Date.now(),
     });
   }
 
-  const renderReceivedInvitations = (authUserId) => {
+  const renderReceivedInvitations = () => {
     if (!invitations.length) return null;
     return invitations
-      .filter(invitation => invitation.invitationToId === authUserId)
       .map(invitation => {
         return invitationItem(invitation.invitationFromId, invitation.invitationFromEmail);
       })
@@ -109,24 +112,22 @@ const Index = () => {
     )
   }
 
-  const renderOnlineUserMails = (authUser) => {
+  const renderOnlineUserMails = () => {
     if (!onlineUsers.length) return null;
     return onlineUsers
-      .filter(user => user.id !== authUser.id)
-      .map(user => {
-        return onlinePlayerWithInvite(user, authUser.email, authUser.id);
+      .map(onlineUser => {
+        return onlinePlayerWithInvite(onlineUser);
       })
   }
 
-  const onlinePlayerWithInvite = (user: User, authUserEmail: string, authUserId: string) => {
+  const onlinePlayerWithInvite = (onlineUser: User) => {
     return (
-      <Paper key={user.id}>
-        { user.email}
-        // TODO: should switch to Cancel invite! after pushed
+      <Paper key={onlineUser.id}>
+        {onlineUser.email}
         <Button
           variant='contained'
           color='primary'
-          onClick={() => inviteUser(user.id, authUserEmail, authUserId)}
+          onClick={() => inviteUser(onlineUser.id)}
         >
           Invite!
         </Button>
@@ -134,7 +135,7 @@ const Index = () => {
     )
   }
 
-  const renderMainPage = (authUser) => {
+  if (user) {
     return (
       <FreeBoardGamesBar FEATURE_FLAG_readyForDesktopView>
         <SEO
@@ -144,7 +145,7 @@ const Index = () => {
           }
         />
         <Header />
-        <p>You're signed in. Email: {authUser.email}</p>
+        <p>You're signed in. Email: {user.email}</p>
         <p
           style={{
             display: 'inline-block',
@@ -155,23 +156,18 @@ const Index = () => {
           onClick={() => logout()}
         >
           Log out
-        </p>
+          </p>
         <p>Online users:</p>
-        {renderOnlineUserMails(authUser)}
+        {renderOnlineUserMails()}
         <p>You have got invitations from:</p>
-        {renderReceivedInvitations(authUser.id)}
+        {renderReceivedInvitations()}
         <GamesList />
       </FreeBoardGamesBar>
     )
   }
 
   return (
-    <AuthUserContext.Consumer>
-      {authUser => {
-        return authUser ? renderMainPage(authUser) : <GoToSignInPage />
-      }
-      }
-    </AuthUserContext.Consumer>
+    <GoToSignInPage />
   )
 }
 

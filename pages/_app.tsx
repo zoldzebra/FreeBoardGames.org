@@ -18,7 +18,8 @@ function MyApp({ Component, pageProps }: AppProps) {
   const firebaseDb = firebase.database();
 
   const checkAuthStateChanged = () => {
-    console.log('checkAuthStateChanged ran');
+    console.log('checkAuthStateChanged ran for user:', user);
+    // this users the auth db user w uid
     firebase.auth().onAuthStateChanged(function (user) {
       if (user) {
         firebaseDb.ref('users/' + user.uid).set({
@@ -33,7 +34,7 @@ function MyApp({ Component, pageProps }: AppProps) {
           });
       }
       if (!user) {
-        console.log('User logged out, user:', user);
+        console.log('User logged out:', user);
       }
     });
   }
