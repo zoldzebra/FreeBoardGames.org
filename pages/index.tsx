@@ -15,6 +15,7 @@ interface User {
 
 interface Invitation {
   invitationToId: string,
+  invitationToEmail: string,
   invitationFromEmail: string,
   invitationFromId: string,
   invitationTime: number,
@@ -23,11 +24,14 @@ interface Invitation {
 const Index = () => {
   const { logout, user } = useUser();
   const [onlineUsers, setOnlineUsers] = useState([] as User[]);
-  const [invitations, setInvitations] = useState([] as Invitation[]);
+  const [userInvitedBy, setUserInvitedBy] = useState([] as Invitation[]);
+  const [invitedByUser, setInvitedByUser] = useState([] as Invitation[]);
+
   const firebaseDb = firebase.database();
   const usersRef = firebaseDb.ref('users');
   const invtiationsRef = firebaseDb.ref('invitations');
 
+  // get online users
   useEffect(() => {
     const listener = usersRef
       .orderByChild('online')
@@ -48,30 +52,56 @@ const Index = () => {
     return () => usersRef.off('value', listener);
   }, [firebaseDb, user]);
 
+  // get active invitations, set userInvitedBy, invitedByUser
   useEffect(() => {
     const listener = invtiationsRef
       .orderByChild('invitationTime')
       .on('value', snapshot => {
-        let activeInvitations = [];
+        let userInvitationsBy = [];
+        let invitationsByUser = [];
         snapshot.forEach(childSnapshot => {
           const invitationToId = childSnapshot.val().invitationToId;
+          const invitationToEmail = childSnapshot.val().invitationToEmail;
           const invitationFromEmail = childSnapshot.val().invitationFromEmail;
           const invitationFromId = childSnapshot.val().invitationFromId;
-          if (user && user.id !== invitationToId) {
-            activeInvitations.push({
+          if (user && user.id === invitationToId) {
+            userInvitationsBy.push({
               id: childSnapshot.key,
               invitationToId,
+              invitationToEmail,
+              invitationFromEmail,
+              invitationFromId,
+            });
+          }
+          if (user && user.id === invitationFromId) {
+            invitationsByUser.push({
+              id: childSnapshot.key,
+              invitationToId,
+              invitationToEmail,
               invitationFromEmail,
               invitationFromId,
             });
           }
         });
-        setInvitations([...activeInvitations]);
+        setUserInvitedBy([...userInvitationsBy]);
+        setInvitedByUser([...invitationsByUser]);
       });
     return () => usersRef.off('value', listener);
   }, [firebaseDb, user]);
 
-  const inviteUser = (invitationToId: string) => {
+  // not used at the moment
+  const getUserData = async (uid) => {
+    let user;
+    firebaseDb.ref('users/' + uid).once("value", snap => {
+      user = {
+        email: snap.val().email,
+        online: snap.val().online,
+      }
+    })
+    return user;
+  }
+
+  const inviteUser = (invitationToId: string, invitationToEmail: string) => {
     // check if invitation exists already
     let invitationExists = false;
     invtiationsRef.once('value', invitations => {
@@ -90,17 +120,26 @@ const Index = () => {
     const newInvite = invtiationsRef.push();
     newInvite.set({
       invitationToId,
+      invitationToEmail,
       invitationFromEmail: user.email,
       invitationFromId: user.id,
       invitationTime: Date.now(),
     });
   }
 
-  const renderReceivedInvitations = () => {
-    if (!invitations.length) return null;
-    return invitations
+  const renderUserInvitedBy = () => {
+    if (!userInvitedBy.length) return null;
+    return userInvitedBy
       .map(invitation => {
         return invitationItem(invitation.invitationFromId, invitation.invitationFromEmail);
+      })
+  }
+
+  const renderInvitedByUser = () => {
+    if (!invitedByUser.length) return null;
+    return invitedByUser
+      .map(invitation => {
+        return invitationItem(invitation.invitationToId, invitation.invitationToEmail);
       })
   }
 
@@ -127,7 +166,7 @@ const Index = () => {
         <Button
           variant='contained'
           color='primary'
-          onClick={() => inviteUser(onlineUser.id)}
+          onClick={() => inviteUser(onlineUser.id, onlineUser.email)}
         >
           Invite!
         </Button>
@@ -160,7 +199,9 @@ const Index = () => {
         <p>Online users:</p>
         {renderOnlineUserMails()}
         <p>You have got invitations from:</p>
-        {renderReceivedInvitations()}
+        {renderUserInvitedBy()}
+        <p>You have invited:</p>
+        {renderInvitedByUser()}
         <GamesList />
       </FreeBoardGamesBar>
     )

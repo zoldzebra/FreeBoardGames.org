@@ -14,7 +14,9 @@ interface gameInfoProps {
 }
 
 class GameInfo extends React.Component<gameInfoProps, {}> {
+  static context = AuthUserContext;
   render() {
+    console.log('AuthUserContext', this.context);
     const gameDef = this.props.gameDef;
     return (
       <AuthUserContext.Consumer>
