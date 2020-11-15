@@ -40,11 +40,14 @@ class Room extends React.Component<IRoomProps, IRoomState> {
 
   componentDidMount() {
     window.addEventListener('beforeunload', this._componentCleanup);
-    this.timer = setInterval(() => this.updateMetadata(), 2000);
+    this.timer = setInterval(() => this.updateMetadata(), 5000); // origianally set to 2000
     this.updateMetadata(true);
   }
 
   render() {
+    console.log(`Rendering Room. roomId: ${this.props.roomID}`);
+    console.log(`Rendering Room. state: ${JSON.stringify(this.state, null, 4)}`);
+
     const LoadingPage = getMessagePage('loading', 'Loading...');
     const nickname = LobbyService.getNickname();
     if (!nickname) {

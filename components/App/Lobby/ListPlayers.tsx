@@ -22,6 +22,7 @@ interface IListPlayersProps {
 export class ListPlayers extends React.Component<IListPlayersProps, {}> {
   render() {
     const metadata = this.props.roomMetadata;
+    console.log(`ListPlayers metadata: ${metadata}`);
     const playersList = metadata.players.map((player: IPlayerInRoom, idx: number) => {
       return (
         <ListItem key={`player-${idx}`}>

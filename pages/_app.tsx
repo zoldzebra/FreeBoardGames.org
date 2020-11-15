@@ -13,12 +13,12 @@ import firebase from 'firebase';
 function MyApp({ Component, pageProps }: AppProps) {
   const { user } = useUser();
 
-  console.log('_app user:', user);
+  // console.log('_app user:', user);
 
   const firebaseDb = firebase.database();
 
   const checkAuthStateChanged = () => {
-    console.log('checkAuthStateChanged ran for user:', user);
+    // console.log('checkAuthStateChanged ran for user:', user);
     // this users the auth db user w uid
     firebase.auth().onAuthStateChanged(function (user) {
       if (user) {

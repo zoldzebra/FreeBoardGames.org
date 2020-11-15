@@ -30,10 +30,13 @@ export interface IStoredCredentials {
 
 export class LobbyService {
   public static async newRoom(gameCode: string, numPlayers: number): Promise<string> {
+    console.log(`LobbyService newroom init w gamecode: ${gameCode}, numPlayers: ${numPlayers}`);
+    console.log(`ServerAddress: ${AddressHelper.getServerAddress()}`);
     const response = await request
       .post(`${AddressHelper.getServerAddress()}/games/${gameCode}/create`)
       .send({ numPlayers });
     const roomID = response.body.gameID;
+    console.log(`LobbyService returning roomId: ${roomID}`);
     return roomID;
     // return 'foo';
   }

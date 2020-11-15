@@ -159,6 +159,7 @@ export class GameModePicker extends React.Component<IGameModePickerProps, IGameM
 
   _playOnlineGame = (info: IGameModeInfo) => () => {
     // second param was e: any
+    console.log('_playOnlineGame ran.');
     this.setState({ ...this.state, playButtonDisabled: true });
     const gameCode = this.props.gameDef.code;
     const numPlayers = this._getExtraInfoValue(info);
